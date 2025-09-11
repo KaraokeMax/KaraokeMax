@@ -160,6 +160,7 @@
     <Compile Include="Models\MusicaModel.cs" />
     <Compile Include="Models\UsuarioModel.cs" />
     <Compile Include="Services\Banco de Dados\ArtistaService.cs" />
+    <Compile Include="Services\Banco de Dados\MusicaService.cs" />
     <Compile Include="Services\Banco de Dados\UsuarioService.cs" />
     <Compile Include="Services\LyricsService.cs" />
     <Compile Include="Views\MainWindow.xaml.cs">
