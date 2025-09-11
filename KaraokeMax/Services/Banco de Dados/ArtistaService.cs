@@ -4,7 +4,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using KaraokeMax.Models;
-using MySql.Data.MySqlClient; 
+using MySql.Data.MySqlClient;
 
 namespace KaraokeMax.Services.Banco_de_Dados
 {

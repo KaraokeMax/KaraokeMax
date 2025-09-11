@@ -17,7 +17,7 @@ namespace KaraokeMax
     {
         public async void Application_Startup(object sender, StartupEventArgs e)
         {
-            Console.WriteLine("Application starting up...");
+            /*Console.WriteLine("Application starting up...");
 
             LyricsService svc = new LyricsService();
             // título + artista (opcional)
@@ -29,9 +29,10 @@ namespace KaraokeMax
                 Console.WriteLine("LRC não encontrada.");
 
             MainWindow janela = new MainWindow();
-            janela.Show();
+            janela.Show();*/
 
-            //Services.Banco_de_Dados.ArtistaService.CriarArtista("Coldplay");
+            Services.Banco_de_Dados.UsuarioService.CriarUsuario("nome","email","tipo");
+            Environment.Exit(0);
         }
     }
 }
