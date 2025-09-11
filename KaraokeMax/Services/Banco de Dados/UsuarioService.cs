@@ -35,14 +35,14 @@ namespace KaraokeMax.Services.Banco_de_Dados
             }
         }
 
-        public static void AlterarSenhaPorId(string id, string novaSenha)
+        public static void AlterarSenhaPrimeiroAcesso(string id, string novaSenha)
         {
             try
             {
                 using (var connection = new MySqlConnection(connectionString))
                 {
                     connection.Open();
-                    string query = "UPDATE Usuarios SET senha = @senha WHERE id = @id";
+                    string query = "UPDATE Usuarios SET senha = @senha, primeiroAcesso = false WHERE id = @id";
                     using (var command = new MySqlCommand(query, connection))
                     {
                         command.Parameters.AddWithValue("@senha", novaSenha);

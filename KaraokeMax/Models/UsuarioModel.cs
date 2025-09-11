@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace KaraokeMax.Models
 {
-    class UsuarioModel
+    public class UsuarioModel
     {
         public String id { get; set; }
         public bool primeiroAcesso { get; set; }

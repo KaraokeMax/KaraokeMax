@@ -4,14 +4,60 @@ using System.Windows;
 using System.Windows.Input;
 using KaraokeMax.Models;
 using KaraokeMax.Services.Banco_de_Dados;
+using System.Windows.Controls;
+using System.Windows.Media.Imaging;
+using KaraokeMax.Views;
 
 namespace KaraokeMax
 {
     public partial class LoginWindow : Window
     {
+        private bool _isPasswordVisible = false;
+        private bool _isSyncing = false; // Flag para evitar loop
+
         public LoginWindow()
         {
             InitializeComponent();
+        }
+
+        private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if (_isSyncing) return;
+            _isSyncing = true;
+            PasswordTextBox.Text = PasswordBox.Password;
+            _isSyncing = false;
+        }
+
+        private void PasswordTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (_isSyncing) return;
+            _isSyncing = true;
+            PasswordBox.Password = PasswordTextBox.Text;
+            _isSyncing = false;
+        }
+
+        private void ShowPasswordButton_Click(object sender, RoutedEventArgs e)
+        {
+            _isPasswordVisible = !_isPasswordVisible;
+            if (_isPasswordVisible)
+            {
+                PasswordTextBox.Visibility = Visibility.Visible;
+                PasswordBox.Visibility = Visibility.Collapsed;
+                EyeIcon.Text = "🔒";
+                PasswordTextBox.Focus();
+
+                // Garante que o cursor vá para o final após o foco
+                PasswordTextBox.CaretIndex = PasswordTextBox.Text.Length;
+                PasswordTextBox.SelectionStart = PasswordTextBox.Text.Length;
+                PasswordTextBox.SelectionLength = 0;
+            }
+            else
+            {
+                PasswordTextBox.Visibility = Visibility.Collapsed;
+                PasswordBox.Visibility = Visibility.Visible;
+                EyeIcon.Text = "👁"; 
+                PasswordBox.Focus();
+            }
         }
 
         private void LoginButton_Click(object sender, RoutedEventArgs e)
@@ -39,7 +85,8 @@ namespace KaraokeMax
                 {
                     if (usuario.primeiroAcesso)
                     {
-
+                        AlterarSenhaWindow alterarSenhaWindow = new AlterarSenhaWindow(usuario);
+                        alterarSenhaWindow.Show();
                     }
                     else
                     {
@@ -63,18 +110,6 @@ namespace KaraokeMax
             {
                 LoginButton_Click(LoginButton, new RoutedEventArgs());
             }
-        }
-
-        private void Forgot_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("Redirecionar para recuperação de senha.", "Esqueci a senha",
-                            MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-
-        private void CreateAccount_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("Redirecionar para cadastro.", "Criar conta",
-                            MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)

@@ -163,6 +163,9 @@
     <Compile Include="Services\Banco de Dados\MusicaService.cs" />
     <Compile Include="Services\Banco de Dados\UsuarioService.cs" />
     <Compile Include="Services\LyricsService.cs" />
+    <Compile Include="Views\AlterarSenhaWindow.xaml.cs">
+      <DependentUpon>AlterarSenhaWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
@@ -198,6 +201,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Views\AlterarSenhaWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\LoginWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
