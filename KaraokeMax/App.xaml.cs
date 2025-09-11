@@ -26,10 +26,10 @@ namespace KaraokeMax
             if (savedPath != null)
                 Console.WriteLine("LRC salva em: " + savedPath);
             else
-                Console.WriteLine("LRC não encontrada.");
+                Console.WriteLine("LRC não encontrada."); */
 
             MainWindow janela = new MainWindow();
-            janela.Show();*/
+            janela.Show();
 
             LoginWindow login = new LoginWindow();
             login.Show();

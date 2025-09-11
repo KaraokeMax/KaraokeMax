@@ -86,6 +86,7 @@ namespace KaraokeMax
                     if (usuario.primeiroAcesso)
                     {
                         AlterarSenhaWindow alterarSenhaWindow = new AlterarSenhaWindow(usuario);
+                        this.Close();
                         alterarSenhaWindow.Show();
                     }
                     else
