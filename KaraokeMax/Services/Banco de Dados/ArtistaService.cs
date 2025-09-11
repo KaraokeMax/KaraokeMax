@@ -1,41 +1,89 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Windows;
 using KaraokeMax.Models;
-using Npgsql;
+using MySql.Data.MySqlClient; 
 
 namespace KaraokeMax.Services.Banco_de_Dados
 {
     static class ArtistaService
     {
-        // String de conexão centralizada para uso em todos os métodos
-        private static readonly string connString = "Host=db.mlhoecnsqszrhhhuxekm.supabase.co;Username=postgres;Password=KaraokePucSecreto;Database=postgres";
+        private static string connectionString = "server=mysql-karaokemax.alwaysdata.net;database=karaokemax_db;uid=430017;pwd=KaraokePucSecreto;";
 
-        public static List<ArtistaModel> GetArtistasFromDatabase()
+        public static void CriarArtista(String nome)
         {
-            List<ArtistaModel> artistas = new List<ArtistaModel>();
-
-            using (var conn = new NpgsqlConnection(connString))
+            try
             {
-                conn.Open();
-                using (var cmd = new NpgsqlCommand("SELECT id, nome, qtdMusicas FROM Artistas", conn))
-                using (var reader = cmd.ExecuteReader())
+                using (var connection = new MySqlConnection(connectionString))
                 {
-                    while (reader.Read())
+                    connection.Open();
+                    string query = "INSERT INTO Artistas (nome) VALUES (@nome)";
+                    using (var command = new MySqlCommand(query, connection))
                     {
-                        artistas.Add(new ArtistaModel(
-                            reader.GetString(0),
-                            reader.GetString(1),
-                            reader.GetInt32(2)
-                        ));
+                        command.Parameters.AddWithValue("@nome", nome);
+                        command.ExecuteNonQuery();
                     }
                 }
             }
-            return artistas;
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao criar artista: " + ex.Message);
+                throw;
+            }
+        }
+
+        public static List<ArtistaModel> SelecionarTodosArtistas()
+        {
+            try
+            {
+                var artistas = new List<ArtistaModel>();
+                using (var connection = new MySqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string query = "SELECT id, nome, qtdMusicas FROM Artistas";
+                    using (var command = new MySqlCommand(query, connection))
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string id = reader["id"].ToString();
+                            string nome = reader["nome"].ToString();
+                            int qtdMusicas = reader["qtdMusicas"] != DBNull.Value ? Convert.ToInt32(reader["qtdMusicas"]) : 0;
+                            artistas.Add(new ArtistaModel(id, nome, qtdMusicas));
+                        }
+                    }
+                }
+                return artistas;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao selecionar artistas: " + ex.Message);
+                throw;
+            }
+        }
+
+        public static void ExcluirArtistaPorId(string id)
+        {       
+            try
+            {
+                using (var connection = new MySqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string query = "DELETE FROM Artistas WHERE id = @id";
+                    using (var command = new MySqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@id", id);
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao excluir artista: " + ex.Message);
+                throw;
+            }
         }
     }
 }
