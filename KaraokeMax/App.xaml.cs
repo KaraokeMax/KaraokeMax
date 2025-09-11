@@ -31,8 +31,8 @@ namespace KaraokeMax
             MainWindow janela = new MainWindow();
             janela.Show();*/
 
-            Services.Banco_de_Dados.UsuarioService.CriarUsuario("nome","email","tipo");
-            Environment.Exit(0);
+            LoginWindow login = new LoginWindow();
+            login.Show();
         }
     }
 }

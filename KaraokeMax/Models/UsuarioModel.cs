@@ -8,12 +8,12 @@ namespace KaraokeMax.Models
 {
     class UsuarioModel
     {
-        String id { get; set; }
-        bool primeiroAcesso { get; set; }
-        String nome { get; set; }
-        String email { get; set; }
-        String senha { get; set; }
-        String tipo { get; set; } // admin convidado ou user
+        public String id { get; set; }
+        public bool primeiroAcesso { get; set; }
+        public String nome { get; set; }
+        public String email { get; set; }
+        public String senha { get; set; }
+        public String tipo { get; set; } // admin convidado ou user
 
         public UsuarioModel(String id, bool primeiroAcesso, String nome, String email, String senha, String tipo)
         {

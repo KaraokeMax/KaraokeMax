@@ -30,7 +30,7 @@ namespace KaraokeMax.Services.Banco_de_Dados
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Erro ao criar artista: " + ex.Message);
+                MessageBox.Show("Erro ao criar usuário: " + ex.Message);
                 throw;
             }
         }
@@ -65,7 +65,7 @@ namespace KaraokeMax.Services.Banco_de_Dados
                 using (var connection = new MySqlConnection(connectionString))
                 {
                     connection.Open();
-                    string query = "SELECT id, primeiroAcesso, nome, email, senha, tipo FROM Usuarios WHERE email = @email AND senha = @senha";
+                    string query = "SELECT * FROM Usuarios WHERE email = @email AND senha = @senha";
                     using (var command = new MySqlCommand(query, connection))
                     {
                         command.Parameters.AddWithValue("@email", email);
@@ -95,5 +95,27 @@ namespace KaraokeMax.Services.Banco_de_Dados
             return null;
         }
 
+        public static void CriaSenha(String idUsuario, String novaSenha)
+        {
+            try
+            {
+                using (var connection = new MySqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string query = "UPDATE Usuarios SET senha = @senha, primeiroAcesso = false WHERE id = @id";
+                    using (var command = new MySqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@senha", novaSenha);
+                        command.Parameters.AddWithValue("@id", idUsuario);
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao criar senha: " + ex.Message);
+                throw;
+            }
+        }
     }
 }
