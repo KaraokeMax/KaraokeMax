@@ -16,8 +16,8 @@ namespace KaraokeMax.Views
 
         private void AlterarSenhaButton_Click(object sender, RoutedEventArgs e)
         {
-            var novaSenha = NovaSenhaBox.Password;
-            var confirmarSenha = ConfirmarSenhaBox.Password;
+            var novaSenha = NovaSenhaBox.Text;
+            var confirmarSenha = ConfirmarSenhaBox.Text;
 
             if (string.IsNullOrWhiteSpace(novaSenha) || string.IsNullOrWhiteSpace(confirmarSenha))
             {

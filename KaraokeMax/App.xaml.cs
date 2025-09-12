@@ -31,8 +31,8 @@ namespace KaraokeMax
             MainWindow janela = new MainWindow();
             janela.Show();
 
-            LoginWindow login = new LoginWindow();
-            login.Show();
+            //LoginWindow login = new LoginWindow();
+            //login.Show();
         }
     }
 }

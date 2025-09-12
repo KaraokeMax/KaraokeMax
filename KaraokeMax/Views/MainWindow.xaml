@@ -7,6 +7,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -25,8 +26,28 @@
             <Button Content="Pause" Width="90" Click="BtnPause_Click"/>
         </StackPanel>
 
+        <!-- Nota -->
+        <TextBlock x:Name="TxtNota"
+                   Grid.Row="2"
+                   HorizontalAlignment="Right"
+                   VerticalAlignment="Center"
+                   FontSize="24"
+                   FontWeight="Bold"
+                   Foreground="DarkViolet"
+                   Margin="0,0,12,0"/>
+
+        <!-- Nota correta da música -->
+        <TextBlock x:Name="TxtNotaCorreta"
+                   Grid.Row="2"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Center"
+                   FontSize="24"
+                   FontWeight="Bold"
+                   Foreground="Green"
+                   Margin="12,0,0,0"/>
+
         <!-- Lista da letra -->
-        <ListBox Grid.Row="2" x:Name="LstLyrics" FontSize="16" />
+        <ListBox Grid.Row="3" x:Name="LstLyrics" FontSize="16" />
 
         <!-- Player invisível -->
         <MediaElement x:Name="Player" LoadedBehavior="Manual" UnloadedBehavior="Manual" Visibility="Collapsed"/>
