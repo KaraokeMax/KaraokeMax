@@ -1,18 +1,24 @@
 ﻿<Window x:Class="KaraokeMax.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Karaoke simples" Height="500" Width="380"
+        Title="Karaoke simples" Height="540" Width="420"
         WindowStartupLocation="CenterScreen">
     <Grid Margin="12">
         <Grid.RowDefinitions>
+            <!-- caminhos -->
             <RowDefinition Height="Auto"/>
+            <!-- controles -->
             <RowDefinition Height="40"/>
+            <!-- linha de notas (correta x cantada) -->
             <RowDefinition Height="40"/>
+            <!-- bloco de afinação (cents + barra) -->
+            <RowDefinition Height="Auto"/>
+            <!-- lista de letras -->
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <!-- Caminhos simples -->
-        <StackPanel Orientation="Vertical" Margin="0,0,0,8">
+        <StackPanel Orientation="Vertical" Grid.Row="0" Margin="0,0,0,8">
             <TextBlock Text="Áudio instrumental (.wav):" />
             <TextBox x:Name="TxtAudio" Margin="0,4,0,0" />
             <TextBlock Text="Letra (LRC puro):" Margin="0,8,0,0" />
@@ -20,34 +26,75 @@
         </StackPanel>
 
         <!-- Controles -->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" >
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Content="Carregar" Margin="0,0,8,0" Width="90" Click="BtnLoad_Click"/>
             <Button Content="Play" Margin="0,0,8,0" Width="90" Click="BtnPlay_Click"/>
             <Button Content="Pause" Width="90" Click="BtnPause_Click"/>
         </StackPanel>
 
-        <!-- Nota -->
-        <TextBlock x:Name="TxtNota"
-                   Grid.Row="2"
-                   HorizontalAlignment="Right"
-                   VerticalAlignment="Center"
-                   FontSize="24"
-                   FontWeight="Bold"
-                   Foreground="DarkViolet"
-                   Margin="0,0,12,0"/>
+        <!-- Linha: Nota correta (esq) e Nota cantada (dir) -->
+        <Grid Grid.Row="2" Margin="0,6,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
 
-        <!-- Nota correta da música -->
-        <TextBlock x:Name="TxtNotaCorreta"
-                   Grid.Row="2"
-                   HorizontalAlignment="Left"
-                   VerticalAlignment="Center"
-                   FontSize="24"
-                   FontWeight="Bold"
-                   Foreground="Green"
-                   Margin="12,0,0,0"/>
+            <!-- Nota correta da música -->
+            <TextBlock x:Name="TxtNotaCorreta"
+                       Grid.Column="0"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center"
+                       FontSize="22"
+                       FontWeight="Bold"
+                       Foreground="Green"
+                       TextTrimming="CharacterEllipsis"
+                       Margin="4,0,8,0"/>
+
+            <!-- Nota cantada -->
+            <TextBlock x:Name="TxtNota"
+                       Grid.Column="1"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       FontSize="22"
+                       FontWeight="Bold"
+                       Foreground="DarkViolet"
+                       TextTrimming="CharacterEllipsis"
+                       Margin="8,0,4,0"/>
+        </Grid>
+
+        <!-- Bloco de afinação -->
+        <StackPanel Grid.Row="3" Orientation="Vertical" Margin="0,8,0,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="60"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="Desvio:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBlock x:Name="TxtCents"
+                           Grid.Column="1"
+                           VerticalAlignment="Center"
+                           FontWeight="SemiBold"/>
+                <TextBlock x:Name="LblAfinacao"
+                           Grid.Column="2"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           FontWeight="Bold"/>
+            </Grid>
+
+            <!-- ProgressBar centralizada (0..100), 50 = afinado -->
+            <ProgressBar x:Name="PgbAfinacao"
+                         Minimum="0"
+                         Maximum="100"
+                         Height="12"
+                         Margin="0,6,0,0"
+                         Value="50"/>
+            <TextBlock Text="(grave ←  |  → agudo)" HorizontalAlignment="Center" Opacity="0.6" FontSize="12" Margin="0,4,0,0"/>
+        </StackPanel>
 
         <!-- Lista da letra -->
-        <ListBox Grid.Row="3" x:Name="LstLyrics" FontSize="16" />
+        <ListBox Grid.Row="4" x:Name="LstLyrics" FontSize="16" />
 
         <!-- Player invisível -->
         <MediaElement x:Name="Player" LoadedBehavior="Manual" UnloadedBehavior="Manual" Visibility="Collapsed"/>

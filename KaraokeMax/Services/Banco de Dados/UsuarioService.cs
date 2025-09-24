@@ -117,5 +117,27 @@ namespace KaraokeMax.Services.Banco_de_Dados
                 throw;
             }
         }
+
+        public static void DeletarUsuario(string id)
+        {
+            try
+            {
+                using (var connection = new MySqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string query = "DELETE FROM Usuarios WHERE id = @id";
+                    using (var command = new MySqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@id", id);
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao deletar usuário: " + ex.Message);
+                throw;
+            }
+        }
     }
 }
