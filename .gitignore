@@ -1,1 +1,14 @@
+# Ignorar variaveis ambiente
 .env
+
+# Ignorar dependências
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
