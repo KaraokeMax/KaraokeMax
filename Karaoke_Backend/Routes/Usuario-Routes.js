@@ -51,6 +51,7 @@ router.post('/usuarios/login', async (req, res) => {
 			res.status(401).json({ error: 'Login inválido' });
 		}
 	} catch (err) {
+		console.log(err);
 		res.status(500).json({ error: err.message || 'Erro interno no servidor' });
 	}
 });
