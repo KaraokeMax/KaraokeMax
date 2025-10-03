@@ -5,9 +5,11 @@ const auth = require('../middleware/auth');
 
 // Adicionar pontuação
 router.post('/pontuacoes', auth, async (req, res) => {
-    const {musicaId, pontos } = req.body;
+    const idMusica = req.body.idMusica;
+    const pontos = req.body.pontos;
+    const publico = req.body.publico ? req.body.publico : false
     try {
-        await pontuacaoService.adicionarPontuacao(req.usuario.id, req.usuario.nome, musicaId, pontos);
+        await pontuacaoService.adicionarPontuacao(req.usuario.id, req.usuario.nome, idMusica, pontos, publico);
         res.status(201).json({ message: 'Pontuação adicionada com sucesso!' });
     } catch (err) {
         console.error('Erro ao adicionar pontuação:', err);

@@ -15,13 +15,18 @@ const Pontuacao = sequelize.define('Pontuacao', {
         type: DataTypes.STRING,
         allowNull: false
     },
-    musicaId: {
+    idMusica: {
         type: DataTypes.INTEGER,
         allowNull: false
     },
     pontos: {
         type: DataTypes.INTEGER,
         allowNull: false
+    },
+    publico: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
     },
     created_at: {
         type: DataTypes.DATE,
@@ -30,5 +35,7 @@ const Pontuacao = sequelize.define('Pontuacao', {
     }
 }, {
     tableName: 'Pontuacoes',
-    timestamps: true
+    timestamps: false
 });
+
+module.exports = Pontuacao;
