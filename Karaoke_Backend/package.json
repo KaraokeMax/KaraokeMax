@@ -10,7 +10,7 @@
     "nodemon": "^3.1.10"
   },
   "scripts": {
-    "dev": "nodemon Karaoke_Backend/index.js",
+    "dev": "nodemon index.js",
     "start": "node index.js"
   }
 }
