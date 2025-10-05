@@ -1,5 +1,17 @@
 import { createApp } from 'vue'
-import './style.css'
 import App from './App.vue'
+import { createRouter, createWebHashHistory } from 'vue-router'
 
-createApp(App).mount('#app')
+// importa a tela de login
+import TelaLogin from './views/TelaLogin.vue'
+
+const routes = [
+  { path: '/', component: TelaLogin } 
+]
+
+const router = createRouter({
+  history: createWebHashHistory(),
+  routes
+})
+
+createApp(App).use(router).mount('#app')
