@@ -1,0 +1,14 @@
+# Flask para API
+flask
+# b2sdk para integração com Backblaze B2
+b2sdk
+# python-dotenv para variáveis de ambiente
+python-dotenv
+# torchaudio, torch e demucs para separação de áudio
+torch
+torchaudio
+demucs
+# librosa para análise de áudio
+librosa
+# numpy para operações matemáticas
+numpy

@@ -1,14 +1,76 @@
-# Ignorar variaveis ambiente
+yarn-debug.log*
+yarn-error.log*
+
+# --- Ambiente ---
 .env
 
-# Ignorar dependências
+# --- Dependências ---
 node_modules/
+Karaoke_Backend/node_modules/
+Karaoke_Frontend/node_modules/
 
-# Logs
+# --- Logs ---
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Sistema operacional
+# --- Sistema operacional ---
 .DS_Store
 Thumbs.db
+
+# --- Python (karaoke_api, NotebooksIA) ---
+karaoke_api/**/__pycache__/
+karaoke_api/**/*.pyc
+karaoke_api/**/*.pyo
+karaoke_api/**/*.pyd
+karaoke_api/outputs/
+karaoke_api/uploads/
+karaoke_api/.env
+karaoke_api/requeriments.txt.bak
+karaoke_api/.vscode/
+NotebooksIA/**/__pycache__/
+NotebooksIA/arquivos/
+NotebooksIA/entradas/
+NotebooksIA/lrc/
+NotebooksIA/midi/
+NotebooksIA/utils/__pycache__/
+
+# --- Node.js (Backend e Frontend) ---
+Karaoke_Backend/.env
+Karaoke_Backend/.vscode/
+Karaoke_Frontend/.env
+Karaoke_Frontend/.vscode/
+
+# --- Electron/Vite/Frontend build ---
+Karaoke_Frontend/dist/
+Karaoke_Frontend/build/
+
+# --- VSCode settings ---
+.vscode/
+
+# --- Sistema operacional ---
+.DS_Store
+Thumbs.db
+
+# --- Logs e arquivos temporários ---
+*.log
+*.tmp
+
+# --- Arquivos temporários do processamento ---
+karaoke_api/temp/
+
+# Comentários explicativos
+# --- Python ---
+# __pycache__, arquivos .pyc, .pyo, .pyd, outputs, uploads, .env
+# --- Node.js ---
+# node_modules, .env, .vscode
+# --- Electron/Vite ---
+# dist, build
+# --- NotebooksIA ---
+# __pycache__, arquivos, entradas, lrc, midi
+# --- VSCode ---
+# .vscode
+# --- SO ---
+# .DS_Store, Thumbs.db
+# --- Logs/Temp ---
+# *.log, *.tmp

@@ -1,7 +1,9 @@
 const Artista = require('../Models/Artista-Model');
+const { toSlug } = require('../Helpers/Slug-Helper');
 
 async function criarArtista(nome) {
-	return await Artista.create({ nome });
+	const slug = toSlug(nome);
+	return await Artista.create({ nome, slug });
 }
 
 async function buscarTodosArtistas() {

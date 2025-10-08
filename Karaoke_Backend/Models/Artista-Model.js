@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../sequelize');
+const { toSlug } = require('../Helpers/Slug-Helper');
 
 const Artista = sequelize.define('Artista', {
 	id: {
@@ -10,6 +11,10 @@ const Artista = sequelize.define('Artista', {
 	nome: {
 		type: DataTypes.STRING,
 		allowNull: false
+	},
+	slug: {
+		type: DataTypes.STRING,
+		allowNull: true,
 	}
 }, 	{
 	tableName: 'Artistas',

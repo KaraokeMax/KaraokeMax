@@ -12,6 +12,11 @@ const Musica = sequelize.define('Musica', {
 		type: DataTypes.STRING,
 		allowNull: false
 	},
+	slug: {
+		type: DataTypes.STRING,
+		allowNull: false,
+		unique: true
+	},
 	artistaId: {
 		type: DataTypes.INTEGER,
 		allowNull: false
@@ -20,6 +25,11 @@ const Musica = sequelize.define('Musica', {
 		type: DataTypes.STRING,
 		allowNull: false,
 		defaultValue: StatusMusica.CARREGANDO
+	},
+	idUsuarioCriador: {
+		type: DataTypes.INTEGER,
+		allowNull: false,
+		defaultValue: 1
 	}
 }, 	{
 	tableName: 'Musicas',
