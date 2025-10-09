@@ -12,3 +12,5 @@ demucs
 librosa
 # numpy para operações matemáticas
 numpy
+#para rodar a API em produção
+gunicorn
