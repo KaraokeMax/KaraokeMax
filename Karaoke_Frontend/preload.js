@@ -1,3 +1,8 @@
+const { contextBridge, ipcRenderer } = require('electron');
+
 window.electronAPI = {
-  // Adicione funções aqui, ex: acessar arquivos locais
+  minimizeWindow: () => ipcRenderer.invoke('minimize-window'),
+  closeWindow: () => ipcRenderer.invoke('close-window'),
+  maximizeWindow: () => ipcRenderer.invoke('maximize-window'),
+  isMaximized: () => ipcRenderer.invoke('is-maximized')
 };
