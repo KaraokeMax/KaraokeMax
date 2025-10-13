@@ -1,6 +1,5 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../sequelize');
-const { toSlug } = require('../Helpers/Slug-Helper');
 
 const Artista = sequelize.define('Artista', {
 	id: {

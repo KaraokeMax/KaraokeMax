@@ -1,5 +1,6 @@
 const express = require('express');
 require('dotenv').config();
+require('./Models/associations');
 const cors = require('cors'); 
 
 const app = express();
@@ -15,7 +16,6 @@ const sequelize = require('./sequelize');
 app.use(cors({
   origin: [
     'http://localhost:5173', // seu front local (Vite)
-    'https://karaokemax.vercel.app' // ou seu domínio de produção (se tiver)
   ],
   methods: ['GET', 'POST', 'PUT', 'PATCH','DELETE'],
   credentials: true
@@ -24,19 +24,14 @@ app.use(cors({
 // Middleware para JSON
 app.use(express.json());
 
-// Rota para servir o HTML tester
-app.get('/teste-musicas', (req, res) => {
-  res.sendFile(__dirname + '/test-musicas.html');
-});
-
 app.use(usuarioRoutes);
 app.use(artistaRoutes);
 app.use(musicaRoutes);
 app.use(pontuacaoRoutes);
 
-sequelize.sync()
+sequelize.sync({ alter: true })
   .then(() => {
-    console.log('Banco de dados sincronizado com os models.');
+    console.log('Banco de dados sincronizado.');
     app.listen(port, () => {
       console.log(`Servidor rodando na porta ${port}`);
     });

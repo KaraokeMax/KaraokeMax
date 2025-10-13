@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-  	baseURL: 'https://karaokemax.onrender.com', 
+  	baseURL: 'https://karaokemax.onrender.com'
+	// baseURL: 'http://localhost:3000'
 });
 
 // Interceptor para adicionar token automaticamente

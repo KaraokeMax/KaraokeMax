@@ -82,6 +82,12 @@
                     </div>
                 </div>
                 
+                <div class="remember-group">
+                    <label class="remember-label">
+                        <input type="checkbox" v-model="rememberMe" class="remember-checkbox" />
+                        Lembrar-me
+                    </label>
+                </div>
                 <button type="submit" class="login-button" :disabled="!email || !password">
                     <span class="button-text">Entrar</span>
                     <svg class="button-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -103,7 +109,8 @@ export default {
             email: "",
             password: "",
             isMaximized: false,
-            showPassword: false
+            showPassword: false,
+            rememberMe: false
         };
     },
     methods: {
@@ -121,6 +128,11 @@ export default {
 
                 if (response.data.token) {
                     localStorage.setItem('token', response.data.token);
+                    if (this.rememberMe) {
+                        localStorage.setItem('rememberedEmail', this.email);
+                    } else {
+                        localStorage.removeItem('rememberedEmail');
+                    }
                     this.$router.push('/principal');
                 }
             } catch (error) {
@@ -156,11 +168,38 @@ export default {
     },
     mounted() {
         this.checkMaximizedState();
+        // Preenche o email se estiver salvo
+        const remembered = localStorage.getItem('rememberedEmail');
+        if (remembered) {
+            this.email = remembered;
+            this.rememberMe = true;
+        }
     }
 };
 </script>
 
 <style scoped>
+/* Checkbox lembrar-me */
+.remember-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    width: 100%;
+}
+.remember-label {
+    font-size: 0.98rem;
+    color: #718096;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+.remember-checkbox {
+    accent-color: #667eea;
+    width: 18px;
+    height: 18px;
+    margin-right: 0.3rem;
+}
 .eye-toggle {
     position: absolute;
     right: 0.7rem;

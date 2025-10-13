@@ -1,6 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../sequelize');
-const StatusMusica = require('../Helpers/Musica-Helper')
+const StatusMusica = require('../Helpers/Musica-Helper');
 
 const Musica = sequelize.define('Musica', {
   	id: {
@@ -26,7 +26,7 @@ const Musica = sequelize.define('Musica', {
 		allowNull: false,
 		defaultValue: StatusMusica.CARREGANDO
 	},
-	idUsuarioCriador: {
+	usuarioCriadorId: {
 		type: DataTypes.INTEGER,
 		allowNull: false,
 		defaultValue: 1

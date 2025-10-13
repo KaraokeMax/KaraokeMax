@@ -35,7 +35,13 @@ async function buscarTodosUsuarios() {
 }
 
 async function buscarPorId(id) {
-	const usuario = await Usuario.findByPk(id);
+	const usuario = await Usuario.findByPk(id, {
+		include: [{
+			association: 'notificacoes',
+			where: { lida: false },
+			required: false
+		}]
+	});
 	if (usuario) {
 		return usuario;
 	}

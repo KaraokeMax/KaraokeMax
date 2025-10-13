@@ -11,7 +11,7 @@ const Notificacao = sequelize.define('Notificacao', {
 		type: DataTypes.STRING,
 		allowNull: false
 	},
-	idUsuario: {
+	usuarioId: {
 		type: DataTypes.INTEGER,
 		allowNull: false
 	},

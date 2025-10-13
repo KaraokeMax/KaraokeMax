@@ -15,7 +15,7 @@ const Pontuacao = sequelize.define('Pontuacao', {
         type: DataTypes.STRING,
         allowNull: false
     },
-    idMusica: {
+    musicaId: {
         type: DataTypes.INTEGER,
         allowNull: false
     },

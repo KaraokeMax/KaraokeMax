@@ -29,7 +29,13 @@ async function criarMusica(nome, artistaId, audioFile, lrcFile) {
 }
 
 async function buscarTodasMusicas() {
-	return await Musica.findAll();
+	return await Musica.findAll({
+		include: [{
+			model: Artista,
+			as: 'artista',
+			attributes: ['nome']
+		}]
+	});
 }
 
 async function deletarMusica(id) {

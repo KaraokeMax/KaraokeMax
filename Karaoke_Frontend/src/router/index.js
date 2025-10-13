@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 import TelaLogin from "../views/TelaLogin.vue";
 import TelaPrincipal from "../views/TelaPrincipal.vue";
+import TelaMusicas from "../views/TelaMusicas.vue";
 
 const routes = [
   {
@@ -12,6 +13,12 @@ const routes = [
     path: "/principal",
     name: "Principal",
     component: TelaPrincipal,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/musicas",
+    name: "Musicas",
+    component: TelaMusicas,
     meta: { requiresAuth: true }
   }
 ];

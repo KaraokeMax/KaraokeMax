@@ -47,7 +47,7 @@
         <div class="main-content">
             <aside class="sidebar">
                 <div class="sidebar-header">
-                    <div class="logo-icon">
+                    <div class="logo-icon" @click="irParaTelaInicial">
                         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M12 2L13.09 8.26L19 7L14.74 12L19 17L13.09 15.74L12 22L10.91 15.74L5 17L9.26 12L5 7L10.91 8.26L12 2Z" fill="currentColor"/>
                         </svg>
@@ -69,9 +69,9 @@
                     </button>
                 </nav>
             </aside>
-            <section class="menu-welcome">
+            <TelaMusicas v-if="mostrarMusicas" :key="mostrarMusicas"  />
+            <section v-else class="menu-welcome">
                 <div class="welcome-content">
-                    <!-- Notificações agora estão no dropdown do sino -->
                     <h1>Bem-vindo ao KaraokeMax!</h1>
                     <p>Escolha uma opção no menu à esquerda para começar a cantar, adicionar músicas ou ver as pontuações dos participantes.</p>
                     <div class="welcome-illustration">
@@ -88,7 +88,13 @@
 </template>
 
 <script>
+import TelaMusicas from './TelaMusicas.vue';
+
 export default {
+    name: 'TelaPrincipal',
+    components: {
+        TelaMusicas
+    },
     name: 'TelaPrincipal',
     data() {
         return {
@@ -98,18 +104,26 @@ export default {
                 { mensagem: '🔔 Você recebeu uma pontuação!' },
                 { mensagem: '🎵 Nova playlist adicionada.' }
             ],
-            dropdownOpen: false
+            dropdownOpen: false,
+            mostrarMusicas: false,
+            musicas: [],
+            search: '',
+            loading: false,
+            musicasFiltradas: []
         };
     },
     methods: {
         irParaEscolherMusica() {
-            this.$router.push({ name: 'EscolherMusica' });
+            this.mostrarMusicas = true;
         },
         irParaAdicionarMusica() {
             this.$router.push({ name: 'AdicionarMusica' });
         },
         irParaPontuacoes() {
             this.$router.push({ name: 'Pontuacoes' });
+        },
+        irParaTelaInicial() {
+            this.mostrarMusicas = false;
         },
         minimizeWindow() {
             if (window.electronAPI) {
@@ -343,6 +357,11 @@ export default {
     color: white;
     box-shadow: 0 4px 16px rgba(102, 126, 234, 0.18);
     margin-bottom: 10px;
+    transition: transform 0.25s cubic-bezier(0.4,0.2,0.2,1), box-shadow 0.25s cubic-bezier(0.4,0.2,0.2,1);
+}
+.logo-icon:hover {
+    transform: scale(1.08) rotate(-6deg);
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.28);
 }
 .logo-icon svg {
     width: 28px;
