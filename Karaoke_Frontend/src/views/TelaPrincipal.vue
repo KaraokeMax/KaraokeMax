@@ -1,6 +1,5 @@
-
 <template>
-    <div class="login-container">
+    <div class="main-menu-layout">
         <!-- Barra de título personalizada -->
         <div class="title-bar">
             <div class="title-bar-drag-area">
@@ -20,6 +19,23 @@
                         <path d="M4 8H8V4H20V16H16V20H4V8ZM6 6V18H14V16H18V6H6ZM8 8V14H6V8H8Z" fill="currentColor"/>
                     </svg>
                 </button>
+                <div class="notification-dropdown-wrapper">
+                    <button class="title-bar-button notification-bell" @click="toggleDropdown" title="Notificações">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2C8.13 2 5 5.13 5 9V15L3 17V18H21V17L19 15V9C19 5.13 15.87 2 12 2ZM12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22Z" fill="currentColor"/>
+                        </svg>
+                        <span v-if="notificacoes.length" class="notification-dot"></span>
+                    </button>
+                    <div v-if="dropdownOpen" class="notification-dropdown">
+                        <div class="notification-title">Notificações</div>
+                        <ul class="notification-list">
+                            <li v-for="(n, idx) in notificacoes" :key="idx" class="notification-item">
+                                {{ n.mensagem }}
+                            </li>
+                            <li v-if="!notificacoes.length" class="notification-item empty">Nenhuma notificação</li>
+                        </ul>
+                    </div>
+                </div>
                 <button class="title-bar-button close" @click="closeWindow" title="Fechar">
                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor"/>
@@ -28,35 +44,45 @@
             </div>
         </div>
 
-        <div class="background-decoration">
-            <div class="floating-shapes">
-                <div class="shape shape-1"></div>
-                <div class="shape shape-2"></div>
-                <div class="shape shape-3"></div>
-            </div>
-        </div>
-
-        <div class="login-box principal-box">
-            <div class="logo-section">
-                <div class="logo-icon">
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2L13.09 8.26L19 7L14.74 12L19 17L13.09 15.74L12 22L10.91 15.74L5 17L9.26 12L5 7L10.91 8.26L12 2Z" fill="currentColor"/>
-                    </svg>
+        <div class="main-content">
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L13.09 8.26L19 7L14.74 12L19 17L13.09 15.74L12 22L10.91 15.74L5 17L9.26 12L5 7L10.91 8.26L12 2Z" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <h2 class="sidebar-title">KaraokeMax</h2>
                 </div>
-                <h1>KaraokeMax</h1>
-                <p class="subtitle">Escolha uma opção para começar</p>
-            </div>
-            <div class="menu">
-                <button class="principal-button" @click="irParaEscolherMusica">
-                    <span>🎤 Escolher música para cantar</span>
-                </button>
-                <button class="principal-button" @click="irParaAdicionarMusica">
-                    <span>➕ Adicionar uma música</span>
-                </button>
-                <button class="principal-button" @click="irParaPontuacoes">
-                    <span>🏆 Ver pontuações</span>
-                </button>
-            </div>
+                <nav class="sidebar-menu">
+                    <button class="sidebar-btn" @click="irParaEscolherMusica">
+                        <span class="icon">🎤</span>
+                        <span>Escolher música</span>
+                    </button>
+                    <button class="sidebar-btn" @click="irParaAdicionarMusica">
+                        <span class="icon">➕</span>
+                        <span>Adicionar música</span>
+                    </button>
+                    <button class="sidebar-btn" @click="irParaPontuacoes">
+                        <span class="icon">🏆</span>
+                        <span>Ver pontuações</span>
+                    </button>
+                </nav>
+            </aside>
+            <section class="menu-welcome">
+                <div class="welcome-content">
+                    <!-- Notificações agora estão no dropdown do sino -->
+                    <h1>Bem-vindo ao KaraokeMax!</h1>
+                    <p>Escolha uma opção no menu à esquerda para começar a cantar, adicionar músicas ou ver as pontuações dos participantes.</p>
+                    <div class="welcome-illustration">
+                        <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="60" cy="60" r="60" fill="#667eea" fill-opacity="0.15"/>
+                            <path d="M60 30L70 80L50 80Z" fill="#764ba2"/>
+                            <ellipse cx="60" cy="90" rx="12" ry="5" fill="#667eea"/>
+                        </svg>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
 </template>
@@ -66,7 +92,13 @@ export default {
     name: 'TelaPrincipal',
     data() {
         return {
-            isMaximized: false
+            isMaximized: false,
+            notificacoes: [
+                { mensagem: '🎉 Bem-vindo! Você tem uma nova música disponível.' },
+                { mensagem: '🔔 Você recebeu uma pontuação!' },
+                { mensagem: '🎵 Nova playlist adicionada.' }
+            ],
+            dropdownOpen: false
         };
     },
     methods: {
@@ -99,16 +131,107 @@ export default {
             if (window.electronAPI) {
                 this.isMaximized = await window.electronAPI.isMaximized();
             }
+        },
+        toggleDropdown() {
+            this.dropdownOpen = !this.dropdownOpen;
+            if (this.dropdownOpen) {
+                document.addEventListener('mousedown', this.handleClickOutside);
+            } else {
+                document.removeEventListener('mousedown', this.handleClickOutside);
+            }
+        },
+        handleClickOutside(event) {
+            const dropdown = this.$el.querySelector('.notification-dropdown-wrapper');
+            if (dropdown && !dropdown.contains(event.target)) {
+                this.dropdownOpen = false;
+                this.notificacoes = [];
+                document.removeEventListener('mousedown', this.handleClickOutside);
+            }
         }
     },
     mounted() {
         this.checkMaximizedState();
+    },
+    beforeDestroy() {
+        document.removeEventListener('mousedown', this.handleClickOutside);
     }
 };
 </script>
 
 <style scoped>
-.login-container {
+.notification-dropdown-wrapper {
+    position: relative;
+    display: inline-block;
+}
+.notification-bell {
+    position: relative;
+}
+.notification-dot {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    width: 8px;
+    height: 8px;
+    background: #e81123;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    z-index: 2;
+}
+.notification-dropdown {
+    position: absolute;
+    top: 36px;
+    right: 0;
+    min-width: 220px;
+    background: rgba(255,255,255,0.97);
+    color: #2d3748;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(44,62,80,0.18);
+    padding: 12px 0 8px 0;
+    z-index: 2000;
+    font-size: 0.98rem;
+    border: 1px solid #e2e8f0;
+}
+.notification-title {
+    font-weight: 700;
+    font-size: 1.08rem;
+    margin-bottom: 8px;
+    margin-left: 18px;
+    letter-spacing: 0.02em;
+    color: #4b2676;
+}
+.notification-list {
+    list-style: none;
+    padding: 0 18px;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.notification-item {
+    background: #edeff5;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.98rem;
+    box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+    color: #373f7c;
+    display: flex;
+    align-items: center;
+}
+.notification-item.empty {
+    background: none;
+    color: #808080;
+    font-style: italic;
+    box-shadow: none;
+    justify-content: center;
+}
+.notification-item.empty {
+    background: none;
+    color: #eee;
+    font-style: italic;
+    box-shadow: none;
+    justify-content: center;
+}
+.main-menu-layout {
     width: 100vw;
     height: 100vh;
     display: flex;
@@ -185,185 +308,163 @@ export default {
     height: 16px;
 }
 
-.background-decoration {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 0;
+.main-content {
+    display: flex;
+    flex: 1;
+    height: calc(100vh - 32px);
 }
 
-.floating-shapes {
-    position: relative;
-    width: 100%;
-    height: 100%;
-}
-
-.shape {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    animation: float 6s ease-in-out infinite;
-}
-
-.shape-1 {
-    width: 200px;
-    height: 200px;
-    top: 10%;
-    left: 10%;
-    animation-delay: 0s;
-}
-
-.shape-2 {
-    width: 150px;
-    height: 150px;
-    top: 60%;
-    right: 15%;
-    animation-delay: 2s;
-}
-
-.shape-3 {
-    width: 100px;
-    height: 100px;
-    bottom: 20%;
-    left: 20%;
-    animation-delay: 4s;
-}
-
-@keyframes float {
-    0%, 100% { transform: translateY(0px) rotate(0deg); }
-    50% { transform: translateY(-20px) rotate(180deg); }
-}
-
-.login-box {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    padding: 3rem 2.5rem;
-    border-radius: 24px;
-    box-shadow: 
-        0 20px 40px rgba(0, 0, 0, 0.1),
-        0 0 0 1px rgba(255, 255, 255, 0.2);
+.sidebar {
+    width: 240px;
+    background: linear-gradient(135deg, #2d3260 0%, #3a225a 100%);
+    box-shadow: 0 8px 32px 0 rgba(44,62,80,0.18);
+    border-right: none;
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%;
-    max-width: 420px;
-    position: relative;
-    z-index: 1;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    margin: auto;
+    padding: 32px 0 0 0;
+    z-index: 10;
+    border-radius: 0 24px 24px 0;
 }
-
-.logo-section {
-    text-align: center;
-    margin-bottom: 2.5rem;
+.sidebar-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 32px;
 }
-
 .logo-icon {
-    width: 64px;
-    height: 64px;
-    margin: 0 auto 1rem;
+    width: 56px;
+    height: 56px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 16px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.18);
+    margin-bottom: 10px;
 }
-
 .logo-icon svg {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
 }
-
-.login-box h1 {
-    color: #2d3748;
-    margin-bottom: 0.5rem;
-    font-size: 2rem;
+.sidebar-title {
+    color: #fff;
+    font-size: 1.3rem;
     font-weight: 700;
-    letter-spacing: -0.025em;
+    letter-spacing: -0.02em;
+    text-shadow: 0 2px 8px rgba(44, 62, 80, 0.18);
 }
-
-.subtitle {
-    color: #718096;
-    font-size: 0.95rem;
-    margin: 0;
-    font-weight: 400;
-}
-
-.menu {
+.sidebar-menu {
     display: flex;
     flex-direction: column;
-    gap: 22px;
+    gap: 18px;
+    width: 100%;
     align-items: center;
-    width: 100%;
 }
-
-.principal-button {
-    width: 100%;
-    max-width: 320px;
-    min-width: 220px;
-    box-sizing: border-box;
-    justify-content: center;
-    text-align: center;
-}
-
-.principal-button {
-    padding: 16px 40px;
-    font-size: 1.15rem;
+.sidebar-btn {
+    width: 180px;
+    padding: 14px 18px;
+    font-size: 1.08rem;
     font-weight: 600;
-    border-radius: 10px;
+    border-radius: 8px;
     border: none;
-    background: linear-gradient(120deg, #667eea 0%, #764ba2 100%);
+    background: rgba(255,255,255,0.08);
     color: #fff;
     cursor: pointer;
-    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.18);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.12);
     transition: background 0.2s, transform 0.2s;
     display: flex;
     align-items: center;
     gap: 0.7rem;
+    justify-content: flex-start;
 }
-
-.principal-button:hover {
-    background: linear-gradient(120deg, #5a67d8 0%, #6b47a1 100%);
+.sidebar-btn:hover {
+    background: rgba(255,255,255,0.18);
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.28);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.18);
 }
-
-.principal-button:active {
+.sidebar-btn:active {
     transform: translateY(0);
 }
-
-@media (max-width: 480px) {
-    .login-box {
-        margin: 1rem;
-        padding: 2rem 1.5rem;
-    }
-    .login-box h1 {
-        font-size: 1.75rem;
-    }
-    .logo-icon {
-        width: 56px;
-        height: 56px;
-    }
-    .logo-icon svg {
-        width: 28px;
-        height: 28px;
-    }
+.sidebar-btn:hover {
+    background: linear-gradient(120deg, #5a67d8 0%, #6b47a1 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.18);
 }
-
-@keyframes slideInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
+.sidebar-btn:active {
+    transform: translateY(0);
+}
+.icon {
+    font-size: 1.3rem;
+    margin-right: 8px;
+}
+.menu-welcome {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    position: relative;
+    z-index: 1;
+}
+.welcome-content {
+    background: rgba(255,255,255,0.85);
+    border-radius: 24px;
+    box-shadow: 0 8px 32px rgba(102,126,234,0.10);
+    padding: 48px 40px;
+    text-align: center;
+    max-width: 480px;
+}
+.welcome-content h1 {
+    color: #2d3748;
+    font-size: 2.1rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+}
+.welcome-content p {
+    color: #4a5568;
+    font-size: 1.08rem;
+    margin-bottom: 2rem;
+}
+.welcome-illustration {
+    margin: 0 auto;
+    margin-top: 12px;
+}
+@media (max-width: 700px) {
+    .main-content {
+        flex-direction: column;
     }
-    to {
-        opacity: 1;
-        transform: translateY(0);
+    .sidebar {
+        width: 100vw;
+        flex-direction: row;
+        justify-content: center;
+        padding: 12px 0;
+        border-right: none;
+        border-bottom: 1px solid rgba(102,126,234,0.12);
+    }
+    .sidebar-header {
+        flex-direction: row;
+        margin-bottom: 0;
+        margin-right: 18px;
+    }
+    .sidebar-title {
+        font-size: 1.1rem;
+    }
+    .sidebar-menu {
+        flex-direction: row;
+        gap: 10px;
+    }
+    .sidebar-btn {
+        width: auto;
+        padding: 10px 12px;
+        font-size: 1rem;
+    }
+    .menu-welcome {
+        padding: 12px;
+    }
+    .welcome-content {
+        padding: 24px 10px;
     }
 }
 </style>

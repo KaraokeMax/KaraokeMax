@@ -68,12 +68,17 @@
                             <path d="M18 8H20C20.55 8 21 8.45 21 9V21C21 21.55 20.55 22 20 22H4C3.45 22 3 21.55 3 21V9C3 8.45 3.45 8 4 8H6V6C6 3.79 7.79 2 10 2H14C16.21 2 18 3.79 18 6V8ZM8 8H16V6C16 4.9 15.1 4 14 4H10C8.9 4 8 4.9 8 6V8ZM5 10V20H19V10H5Z" fill="currentColor"/>
                         </svg>
                         <input 
-                            type="password" 
+                            :type="showPassword ? 'text' : 'password'"
                             placeholder="Senha" 
                             v-model="password"
                             required
                             class="form-input"
                         />
+                        <button type="button" class="eye-toggle" @click="showPassword = !showPassword" :aria-label="showPassword ? 'Esconder senha' : 'Mostrar senha'">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="eye-icon">
+                                <path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8a3 3 0 100 6 3 3 0 000-6z" fill="#718096"/>
+                            </svg>
+                        </button>
                     </div>
                 </div>
                 
@@ -97,7 +102,8 @@ export default {
         return {
             email: "",
             password: "",
-            isMaximized: false
+            isMaximized: false,
+            showPassword: false
         };
     },
     methods: {
@@ -155,6 +161,27 @@ export default {
 </script>
 
 <style scoped>
+.eye-toggle {
+    position: absolute;
+    right: 0.7rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    z-index: 3;
+    height: 28px;
+}
+.eye-icon {
+    width: 22px;
+    height: 22px;
+    color: #718096;
+    transition: opacity 0.2s;
+    display: block;
+}
 .login-container {
     width: 100vw;
     height: 100vh;
