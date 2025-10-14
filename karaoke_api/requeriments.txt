@@ -1,0 +1,16 @@
+# Web
+flask==2.3.3
+
+# Áudio e processamento
+librosa==0.10.2
+numpy==1.26.5
+scipy==1.12.2
+soundfile==0.12.1
+torchaudio==2.2.0
+torch==2.2.0
+
+# Separação de fontes (Demucs)
+demucs==3.0.0
+
+# Manipulação de LRC / regex
+regex==2025.10.1
