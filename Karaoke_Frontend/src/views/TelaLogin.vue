@@ -134,8 +134,10 @@ export default {
                     localStorage.setItem('token', response.data.token);
                     if (this.rememberMe) {
                         localStorage.setItem('rememberedEmail', this.email);
+                        localStorage.setItem('rememberedPassword', this.password);
                     } else {
                         localStorage.removeItem('rememberedEmail');
+                        localStorage.removeItem('rememberedPassword');
                     }
                     this.$router.push('/principal');
                 }
@@ -176,10 +178,14 @@ export default {
     mounted() {
         this.checkMaximizedState();
         // Preenche o email se estiver salvo
-        const remembered = localStorage.getItem('rememberedEmail');
-        if (remembered) {
-            this.email = remembered;
+        const rememberedEmail = localStorage.getItem('rememberedEmail');
+        const rememberedPassword = localStorage.getItem('rememberedPassword');
+        if (rememberedEmail) {
+            this.email = rememberedEmail;
             this.rememberMe = true;
+        }
+        if (rememberedPassword) {
+            this.password = rememberedPassword;
         }
     }
 };

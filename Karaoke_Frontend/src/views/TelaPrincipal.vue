@@ -88,6 +88,7 @@
 </template>
 
 <script>
+import api from '../services/api';
 import TelaMusicas from './TelaMusicas.vue';
 
 export default {
@@ -99,17 +100,14 @@ export default {
     data() {
         return {
             isMaximized: false,
-            notificacoes: [
-                { mensagem: '🎉 Bem-vindo! Você tem uma nova música disponível.' },
-                { mensagem: '🔔 Você recebeu uma pontuação!' },
-                { mensagem: '🎵 Nova playlist adicionada.' }
-            ],
+            notificacoes: [],
             dropdownOpen: false,
             mostrarMusicas: false,
             musicas: [],
             search: '',
             loading: false,
-            musicasFiltradas: []
+            musicasFiltradas: [],
+            usuario: null
         };
     },
     methods: {
@@ -158,13 +156,25 @@ export default {
             const dropdown = this.$el.querySelector('.notification-dropdown-wrapper');
             if (dropdown && !dropdown.contains(event.target)) {
                 this.dropdownOpen = false;
+                this.notificacoes.forEach((n) => {
+                    api.put(`/notificacoes/${n.id}/lida`).catch((error) => {
+                        console.error('Erro ao marcar notificação como lida:', error);
+                    });
+                });
                 this.notificacoes = [];
                 document.removeEventListener('mousedown', this.handleClickOutside);
             }
         }
     },
-    mounted() {
+    async mounted() {
         this.checkMaximizedState();
+        try {
+            const response = await api.get('/usuarios/me');
+            this.usuario = response.data;
+            this.notificacoes = this.usuario.notificacoes || [];
+        } catch (error) {
+            console.error('Erro ao buscar usuário:', error);
+        }
     },
     beforeDestroy() {
         document.removeEventListener('mousedown', this.handleClickOutside);
