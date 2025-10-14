@@ -2,6 +2,8 @@ import { createRouter, createWebHashHistory } from "vue-router";
 import TelaLogin from "../views/TelaLogin.vue";
 import TelaPrincipal from "../views/TelaPrincipal.vue";
 import TelaMusicas from "../views/TelaMusicas.vue";
+import TelaKaraoke from "../views/TelaKaraoke.vue";
+import TelaDefinirSenha from "../views/TelaDefinirSenha.vue";
 
 const routes = [
   {
@@ -20,6 +22,17 @@ const routes = [
     name: "Musicas",
     component: TelaMusicas,
     meta: { requiresAuth: true }
+  },
+  {
+    path: "/karaoke",
+    name: "Karaoke",
+    component: TelaKaraoke,
+    props: route => ({ musica: route.query.musica ? JSON.parse(route.query.musica) : null })
+  },
+  {
+    path: "/definirSenha",
+    name: "DefinirSenha",
+    component: TelaDefinirSenha
   }
 ];
 
@@ -39,7 +52,7 @@ router.isReady().then((to, from, next) => {
   } else if (to.name === 'Login' && token) {
     next('/principal');
   } else {
-    next();
+    next('/definirSenha');
   }
 });
 

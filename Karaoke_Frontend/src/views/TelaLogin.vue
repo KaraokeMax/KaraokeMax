@@ -126,6 +126,10 @@ export default {
                     senha: this.password
                 });
 
+                if (response.data.primeiroAcesso) {
+                    this.$router.push({ path: '/definirSenha', query: { id: response.data.id } });
+                    return;
+                }
                 if (response.data.token) {
                     localStorage.setItem('token', response.data.token);
                     if (this.rememberMe) {
@@ -134,6 +138,9 @@ export default {
                         localStorage.removeItem('rememberedEmail');
                     }
                     this.$router.push('/principal');
+                }
+                else {
+                    alert("Login falhou. Tente novamente.");
                 }
             } catch (error) {
                 console.error('Erro no login:', error);

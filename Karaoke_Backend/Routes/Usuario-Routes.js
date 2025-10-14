@@ -42,7 +42,7 @@ router.post('/usuarios/login', async (req, res) => {
 				{ expiresIn: '1h' }
 			);
 			await usuarioService.atualizarTokenUsuario(usuario.id, token);
-			const resposta = { token };
+			const resposta = { id: usuario.id, token };
 			if (usuario.primeiroAcesso) {
 				resposta.primeiroAcesso = true;
 			}
@@ -72,7 +72,7 @@ router.get('/usuarios/me', auth, async (req, res) => {
 });
 
 // Criar senha (igual ao alterar senha)
-router.put('/usuarios/:id/criasenha', auth, async (req, res) => {
+router.put('/usuarios/:id/criarSenha', auth, async (req, res) => {
 	const { id } = req.params;
 	const { novaSenha } = req.body;
 	try {
