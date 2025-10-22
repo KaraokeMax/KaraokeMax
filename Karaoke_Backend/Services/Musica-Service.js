@@ -32,8 +32,7 @@ async function buscarTodasMusicas() {
 	return await Musica.findAll({
 		include: [{
 			model: Artista,
-			as: 'artista',
-			attributes: ['nome']
+			as: 'artista'
 		}]
 	});
 }
@@ -50,6 +49,23 @@ async function alteraStatusMusica(id, status) {
 	const musica = await Musica.updateOne({ _id: id }, { status: status });
 	return musica;
 }
+
+async function buscarMusicaComArtista(id) {
+	const musica = await Musica.findByPk(id, {
+		include: [{
+			model: Artista,
+			as: 'artista',
+		}]
+	});
+
+	if (!musica) throw new Error('Música não encontrada');
+
+	return {
+		musica_slug: musica.slug,
+		artista_slug: musica.artista.slug
+	};
+}
+	
 
 module.exports = {
 	criarMusica,

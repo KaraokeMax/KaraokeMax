@@ -132,9 +132,11 @@ export default {
                 }
                 if (response.data.token) {
                     localStorage.setItem('token', response.data.token);
+                    localStorage.setItem('token_expiry', Date.now() + 60 * 60 * 1000); // 1 hora
                     if (this.rememberMe) {
                         localStorage.setItem('rememberedEmail', this.email);
                         localStorage.setItem('rememberedPassword', this.password);
+                        localStorage.setItem('horarioLogin', new Date().toISOString());
                     } else {
                         localStorage.removeItem('rememberedEmail');
                         localStorage.removeItem('rememberedPassword');
@@ -180,12 +182,10 @@ export default {
         // Preenche o email se estiver salvo
         const rememberedEmail = localStorage.getItem('rememberedEmail');
         const rememberedPassword = localStorage.getItem('rememberedPassword');
-        if (rememberedEmail) {
+        if (rememberedEmail && rememberedPassword) {
             this.email = rememberedEmail;
-            this.rememberMe = true;
-        }
-        if (rememberedPassword) {
             this.password = rememberedPassword;
+            this.rememberMe = true;
         }
     }
 };

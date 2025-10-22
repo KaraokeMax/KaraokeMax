@@ -5,16 +5,11 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import TelaLogin from './views/TelaLogin.vue'
 import TelaPrincipal from './views/TelaPrincipal.vue'
 import TelaDefinirSenha from './views/TelaDefinirSenha.vue'
+import TelaKaraoke from './views/TelaKaraoke.vue'
+import router  from './router'
 
-const routes = [
-  { path: '/', component: TelaLogin },
-  { path: '/principal', component: TelaPrincipal },
-  { path: '/definirSenha', component: TelaDefinirSenha }
-]
-
-const router = createRouter({
-  history: createWebHashHistory(),
-  routes
-})
+const app = createApp(App)
+app.use(router)
+app.mount('#app')
 
 createApp(App).use(router).mount('#app')

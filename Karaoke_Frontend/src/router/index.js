@@ -6,54 +6,60 @@ import TelaKaraoke from "../views/TelaKaraoke.vue";
 import TelaDefinirSenha from "../views/TelaDefinirSenha.vue";
 
 const routes = [
-  {
-    path: "/",
-    name: "Login",
-    component: TelaLogin
-  },
-  {
-    path: "/principal",
-    name: "Principal",
-    component: TelaPrincipal,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: "/musicas",
-    name: "Musicas",
-    component: TelaMusicas,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: "/karaoke",
-    name: "Karaoke",
-    component: TelaKaraoke,
-    props: route => ({ musica: route.query.musica ? JSON.parse(route.query.musica) : null })
-  },
-  {
-    path: "/definirSenha",
-    name: "DefinirSenha",
-    component: TelaDefinirSenha
-  }
+	{
+		path: "/",
+		name: "Login",
+		component: TelaLogin
+	},
+	{
+		path: "/definirSenha",
+		name: "DefinirSenha",
+		component: TelaDefinirSenha
+	},
+	{
+		path: "/principal",
+		name: "Principal",
+		component: TelaPrincipal,
+		meta: { requiresAuth: true }
+	},
+	{
+		path: "/musicas",
+		name: "Musicas",
+		component: TelaMusicas,
+		meta: { requiresAuth: true }
+	},
+	{
+		path: "/karaoke",
+		name: "Karaoke",
+		component: TelaKaraoke,
+		props: route => ({ id: route.query.id})
+	},
 ];
 
 const router = createRouter({
-  history: createWebHashHistory(),
-  routes
+    history: createWebHashHistory(),
+    routes
 });
 
-
 // Guard para proteger rotas que requerem autenticação
-router.isReady().then((to, from, next) => {
-  const token = localStorage.getItem('token');
-  console.log(token);
-  
-  if (to.meta.requiresAuth && !token) {
-    next('/');
-  } else if (to.name === 'Login' && token) {
-    next('/principal');
-  } else {
-    next('/definirSenha');
-  }
+router.beforeEach((to, from, next) => {
+    const token = localStorage.getItem('token');
+    const expiry = localStorage.getItem('token_expiry');
+    const now = Date.now();
+
+    // Verifica se o token existe e se está expirado
+    const isTokenValid = token && expiry && now < Number(expiry);
+
+    if (to.meta.requiresAuth && !isTokenValid) {
+        // Remove token inválido
+        localStorage.removeItem('token');
+        localStorage.removeItem('token_expiry');
+        next('/');
+    } else if (to.name === 'Login' && isTokenValid) {
+        next('/principal');
+    } else {
+        next();
+    }
 });
 
 export default router;
