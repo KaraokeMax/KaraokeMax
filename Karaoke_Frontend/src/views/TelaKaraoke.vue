@@ -89,12 +89,12 @@
 				</div>
 
 				<div class="lyrics-container">
-					<div class="lyrics-scroll">
+					<div class="lyrics-scroll" ref="lyricsScroll">
 						<div v-for="(linha, idx) in letras" :key="idx" :class="['lyric-line', {
 							'active': idx === linhaAtual,
 							'passed': idx < linhaAtual,
 							'next': idx === linhaAtual + 1
-						}]">
+						}]" :ref="el => { if (idx === linhaAtual) currentLineRef = el }">
 							{{ linha.texto }}
 						</div>
 					</div>
@@ -173,7 +173,8 @@ export default {
 			pontuacaoTotal: 0,
 			acertos: 0,
 			totalNotas: 0,
-			isMaximized: false
+			isMaximized: false,
+        	currentLineRef: null
 		};
 	},
 	computed: {
@@ -483,6 +484,25 @@ export default {
 					break;
 				}
 			}
+			// Rolar para a linha atual
+			this.$nextTick(() => {
+				if (this.currentLineRef && this.$refs.lyricsScroll) {
+					const container = this.$refs.lyricsScroll;
+					const element = this.currentLineRef;
+					
+					// Pega a posição do elemento em relação ao container
+					const elementRect = element.getBoundingClientRect();
+					const containerRect = container.getBoundingClientRect();
+					
+					// Calcula quanto precisa rolar para centralizar
+					const offset = elementRect.top - containerRect.top - (containerRect.height / 2) + (elementRect.height / 2);
+					
+					container.scrollBy({
+						top: offset,
+						behavior: 'smooth'
+					});
+				}
+			});
 		},
 
 		togglePlay() {
@@ -779,16 +799,29 @@ export default {
 }
 
 .lyrics-container {
-	flex: 1;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	padding: 2rem;
-	overflow: hidden;}
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    overflow: hidden;
+}
 
 .lyrics-scroll {
-	text-align: center;
-	max-width: 800px;
+    text-align: center;
+    max-width: 800px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 2rem 1rem;
+    scroll-behavior: smooth;
+    
+    /* Esconde a scrollbar mas mantém a funcionalidade */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+.lyrics-scroll::-webkit-scrollbar {
+    display: none; /* Chrome/Safari/Opera */
 }
 
 .lyric-line {
