@@ -12,12 +12,18 @@ const musicaRoutes = require('./Routes/Musica-Routes');
 const pontuacaoRoutes = require('./Routes/Pontuacao-Routes');
 const sequelize = require('./sequelize');
 
-// ✅ Habilita CORS antes de qualquer rota
+// Habilita CORS antes de qualquer rota
 app.use(cors({
-  origin: [
-    'http://localhost:5173', // seu front local (Vite)
-  ],
-  methods: ['GET', 'POST', 'PUT', 'PATCH','DELETE'],
+  origin: function (origin, callback) {
+    // Permite requests sem origem (ex: curl, Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("CORS não permitido para esta origem: " + origin));
+    }
+  },
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   credentials: true
 }));
 
