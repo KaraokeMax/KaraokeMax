@@ -66,6 +66,10 @@ async function buscarMusicaComArtista(id) {
 	};
 }
 	
+async function verificarMusicaExiste(musica_slug) {
+	const musica = await Musica.findOne({ where: { slug: musica_slug } });
+	return !!musica;
+}
 
 module.exports = {
 	criarMusica,

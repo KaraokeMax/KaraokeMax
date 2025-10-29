@@ -7,8 +7,11 @@ const auth = require('../middleware/auth');
 router.post('/artistas', auth, async (req, res) => {
 	const { nome } = req.body;
 	try {
-		await artistaService.criarArtista(nome);
-		res.status(201).json({ message: 'Artista criado com sucesso!' });
+		const result = await artistaService.criarArtista(nome);
+		if (!result) {
+			return res.status(200).json({ message: 'Artista já existe.', artista: result.id });
+		}
+		res.status(200).json({ message: 'Artista criado com sucesso!', artista: result.id });
 	} catch (err) {
 		console.error('Erro ao criar artista:', err);
 		res.status(500).json({ error: err.message || 'Erro interno no servidor' });

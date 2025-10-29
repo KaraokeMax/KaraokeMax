@@ -3,6 +3,10 @@ const { toSlug } = require('../Helpers/Slug-Helper');
 
 async function criarArtista(nome) {
 	const slug = toSlug(nome);
+	const artistaExistente = await Artista.findOne({ where: { slug } });
+	if (artistaExistente) {
+		return artistaExistente;
+	}
 	return await Artista.create({ nome, slug });
 }
 

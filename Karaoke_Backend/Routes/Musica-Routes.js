@@ -100,4 +100,17 @@ router.delete('/musicas/:id', auth, async (req, res) => {
 	}
 });
 
+// Verifica se música existe no banco 
+router.get('/musicas/:nomeMusica', auth, async (req, res) => {
+	const { nomeMusica } = req.params;
+	try {
+		const musica_slug = musicaService.gerarSlug(nomeMusica);
+		const existe = await musicaService.verificarMusicaExiste(musica_slug);
+		res.json({ musicaExiste: existe });
+	} catch (err) {
+		console.error('Erro ao verificar existência da música:', err);
+		res.status(500).json({ error: err.message || 'Erro interno no servidor' });
+	}
+});
+
 module.exports = router;
