@@ -51,7 +51,7 @@ router.get('/musicas/arquivos/:id', auth, async (req, res) => {
 	let musica_slug = "p_do_pecado";
 
     // baixa os streams do B2
-    const { instrumentos, lyrics } = await b2Service.getKaraokeStreams(artista_slug, musica_slug);
+    const { instrumentos, lyrics, notes } = await b2Service.getKaraokeStreams(artista_slug, musica_slug);
 
     // nome do zip
     const zipName = `${artista_slug}-${musica_slug}.zip`;
@@ -76,6 +76,7 @@ router.get('/musicas/arquivos/:id', auth, async (req, res) => {
     // adiciona os dois arquivos ao zip
     archive.append(instrumentos.stream, { name: 'Instrumentos.wav' });
     archive.append(lyrics.stream, { name: 'lyrics.lrc' });
+	archive.append(notes.stream, { name: 'notes.json' });
 
     // finaliza (começa a enviar)
     await archive.finalize();

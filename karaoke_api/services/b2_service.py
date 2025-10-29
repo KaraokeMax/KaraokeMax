@@ -40,7 +40,7 @@ class B2Uploader:
         if self._bucket is None:
             raise ValueError(f"Bucket '{bucket_name}' não encontrado.")
 
-    def upload_files(self, wav1_path: str | Path, wav2_path: str | Path, lrc_path: str | Path, *, prefix: str, file_infos: Optional[Dict[str, str]] = None) -> Dict[str, Dict[str, str]]:
+    def upload_files(self, wav1_path: str | Path, wav2_path: str | Path, lrc_path: str | Path, json_path: str | Path, *, prefix: str, file_infos: Optional[Dict[str, str]] = None) -> Dict[str, Dict[str, str]]:
         """
         Sobe dois .wav e um .lrc para o bucket privado, organizando em pastas de artista/música.
         Usa upload_large_file para arquivos grandes e faz uploads em paralelo.
@@ -49,7 +49,8 @@ class B2Uploader:
         paths = {
             "voz": Path(wav1_path),
             "instrumentos": Path(wav2_path),
-            "lyrics": Path(lrc_path)
+            "lyrics": Path(lrc_path),
+            "json": Path(json_path)
         }
         infos = {
             "uploadedBy": "B2Uploader",
@@ -67,6 +68,8 @@ class B2Uploader:
                 remote_name = f"{prefix}/instrumentos.wav"
             elif label == "lyrics":
                 remote_name = f"{prefix}/lyrics.lrc"
+            elif label == "json":
+                remote_name = f"{prefix}/notes.json"
             else:
                 remote_name = f"{prefix}/{p.name}"
             content_type = self._guess_content_type(p)
@@ -120,5 +123,7 @@ class B2Uploader:
             return "audio/wav"
         elif ext == ".lrc":
             return "text/plain"
+        elif ext == ".json":
+            return "application/json"
         else:
             return "application/octet-stream"

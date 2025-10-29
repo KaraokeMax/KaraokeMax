@@ -1,7 +1,7 @@
 from services.b2_service import B2Uploader
 import os
 
-def upload_to_b2(voz_path, instrumental_path, lrc_final_path, artista_nome, musica_nome, id_job):
+def upload_to_b2(voz_path, instrumental_path, lrc_final_path, json_path, artista_nome, musica_nome, id_job):
     """
     Controller para upload de arquivos ao B2. Valida dados e chama o serviço.
     Adiciona logs e tratamento de erro detalhado.
@@ -9,16 +9,17 @@ def upload_to_b2(voz_path, instrumental_path, lrc_final_path, artista_nome, musi
     try:
         print(f"[B2 UPLOAD] Iniciando upload para B2...")
         # Valida parâmetros obrigatórios
-        if not all([voz_path, instrumental_path, lrc_final_path, artista_nome, musica_nome, id_job]):
+        if not all([voz_path, instrumental_path, lrc_final_path, json_path, artista_nome, musica_nome, id_job]):
             raise ValueError("Todos os parâmetros são obrigatórios para o upload ao B2.")
         # Valida existência dos arquivos
-        for f in [voz_path, instrumental_path, lrc_final_path]:
+        for f in [voz_path, instrumental_path, lrc_final_path, json_path]:
             if not os.path.exists(f):
                 print(f"[B2 UPLOAD ERROR] Arquivo não encontrado: {f}")
                 raise FileNotFoundError(f"Arquivo não encontrado: {f}")
             elif os.path.getsize(f) == 0:
                 print(f"[B2 UPLOAD ERROR] Arquivo está vazio: {f}")
                 raise ValueError(f"Arquivo está vazio: {f}")
+            
         # Monta prefixo
         artista_nome = str(artista_nome).strip().replace("/", "-")
         musica_nome = str(musica_nome).strip().replace("/", "-")
@@ -29,6 +30,7 @@ def upload_to_b2(voz_path, instrumental_path, lrc_final_path, artista_nome, musi
             wav1_path=voz_path,
             wav2_path=instrumental_path,
             lrc_path=lrc_final_path,
+            json_path=json_path,
             prefix=prefix,
             file_infos={
                 "musica_nome": musica_nome,

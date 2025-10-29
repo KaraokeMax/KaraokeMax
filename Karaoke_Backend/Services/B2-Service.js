@@ -64,6 +64,24 @@ async function getKaraokeStreams(artista_slug, musica_slug) {
     throw err;
   }
 
+  // lyrics.lrc
+  let notesRes;
+  try {
+    notesRes = await b2.downloadFileByName({
+      bucketName: BUCKET_NAME,
+      fileName: `${basePath}/notes.json`,
+      responseType: 'stream'
+    });
+  } catch (e) {
+    const status = e?.response?.status || 500;
+    const msg = status === 404
+      ? `lyrics.lrc não encontrado em ${basePath}`
+      : `Falha ao baixar lyrics.lrc: ${e.message || e}`;
+    const err = new Error(msg);
+    err.status = status;
+    throw err;
+  }
+
   return {
     instrumentos: {
       stream: instrumentosRes.data,
@@ -74,6 +92,11 @@ async function getKaraokeStreams(artista_slug, musica_slug) {
       stream: lyricsRes.data,
       headers: lyricsRes.headers,
       fileName: 'lyrics.lrc'
+    },
+    notes: {
+      stream: notesRes.data,
+      headers: notesRes.headers,
+      fileName: 'notes.json'
     }
   };
 }
