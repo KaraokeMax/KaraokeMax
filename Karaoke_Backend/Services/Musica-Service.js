@@ -1,6 +1,7 @@
 const Musica = require('../Models/Musica-Model');
 const Artista = require('../Models/Artista-Model');
 const StatusMusica = require('../Helpers/Musica-Helper');
+const { Op } = require('sequelize');
 const axios = require('axios');
 const urlPythonServer = process.env.PYTHON_SERVER_URL;
 const notificacaoService = require('./Notificacao-Service');
@@ -67,12 +68,16 @@ async function buscarMusicaComArtista(id) {
 }
 	
 async function verificarMusicaExiste(musica_slug) {
-	const musica = await Musica.findOne({ where: { slug: musica_slug } });
+	// Busca uma música pelo slug cujo status seja diferente de ERRO
+	const musica = await Musica.findOne({ where: { slug: musica_slug, status: { [Op.ne]: StatusMusica.ERRO } } });
 	return !!musica;
 }
 
 module.exports = {
 	criarMusica,
 	buscarTodasMusicas,
-	deletarMusica
+	deletarMusica,
+	verificarMusicaExiste,
+	buscarMusicaComArtista
 };
+
