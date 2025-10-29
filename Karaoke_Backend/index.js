@@ -12,6 +12,10 @@ const musicaRoutes = require('./Routes/Musica-Routes');
 const pontuacaoRoutes = require('./Routes/Pontuacao-Routes');
 const sequelize = require('./sequelize');
 
+const allowedOrigins = [
+  "http://localhost:5173"
+];
+
 // Habilita CORS antes de qualquer rota
 app.use(cors({
   origin: function (origin, callback) {
