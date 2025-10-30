@@ -1,17 +1,17 @@
 const Musica = require('../Models/Musica-Model');
-const Artista = require('../Models/Artista-Model');
+const artistaService = require('../Models/Artista-Service');
 const StatusMusica = require('../Helpers/Musica-Helper');
 const { Op } = require('sequelize');
 const axios = require('axios');
 const urlPythonServer = process.env.PYTHON_SERVER_URL;
 const notificacaoService = require('./Notificacao-Service');
 
-async function criarMusica(nome, artistaId, audioFile, lrcFile) {
-	let artista = await Artista.findByPk(artistaId);		
-	if (!artista) throw new Error('Artista não encontrado');
+async function criarMusica(nome, nomeArtista, audioFile, lrcFile) {
+	const artista = await artistaService.criarArtista(nomeArtista);
+	if (!artista) throw new Error('Erro ao criar artista.');
 
 	const slug = toSlug(nome);
-	let musica = await Musica.create({ nome, artistaId, slug });
+	let musica = await Musica.create({ nome, artistaId: artista.id, slug });
 
     const pythonResponse = await axios.post(`${urlPythonServer}/process`, {
         musica_nome: musica.slug,
@@ -67,8 +67,8 @@ async function buscarMusicaComArtista(id) {
 	};
 }
 	
-async function verificarMusicaExiste(musica_slug) {
-	// Busca uma música pelo slug cujo status seja diferente de ERRO
+async function verificarMusicaExiste(nomeMusica) {
+	const musica_slug = toSlug(nomeMusica);
 	const musica = await Musica.findOne({ where: { slug: musica_slug, status: { [Op.ne]: StatusMusica.ERRO } } });
 	return !!musica;
 }

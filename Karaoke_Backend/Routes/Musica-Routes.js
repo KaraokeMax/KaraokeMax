@@ -9,13 +9,13 @@ const upload = multer({ dest: 'uploads/' });
 const notificacaoService = require('../Services/Notificacao-Service');
 
 // Criar música
-router.post('/musicas', auth, upload.fields([{ name: 'audio' }, { name: 'lrc' }]), (req, res) => {
+router.post('/musicas', upload.fields([{ name: 'audio' }, { name: 'lrc' }]), (req, res) => {
 	if (!req.usuario) return res.status(401).json({ error: 'Usuário não autenticado.' });
 
-	const { nome, artistaId } = req.body;
+	const { nomeMusica, nomeArtista } = req.body;
 	const audioFile = req.files['audio']?.[0];
 	const lrcFile = req.files['lrc']?.[0];
-	if (!nome || !artistaId || !audioFile || !lrcFile) {
+	if (!nomeMusica || !nomeArtista || !audioFile || !lrcFile) {
 		return res.status(400).json({ error: 'Estão faltando informações.' });
 	}
 
@@ -23,11 +23,11 @@ router.post('/musicas', auth, upload.fields([{ name: 'audio' }, { name: 'lrc' }]
 
 	setImmediate(async () => {
 		try {
-			await musicaService.criarMusica(nome, artistaId, audioFile, lrcFile);
+			await musicaService.criarMusica(nomeMusica, nomeArtista, audioFile, lrcFile);
 		} catch (err) {
 			console.error('Erro ao criar/processar música (assíncrono):', err);
 			await musicaService.alteraStatusMusica(musica.id, StatusMusica.ERRO);
-			await notificacaoService.criarNotificacao(req.usuario.id, null, `Erro ao criar/processar a música "${nome}".`, false, err.message);
+			await notificacaoService.criarNotificacao(req.usuario.id, null, `Erro ao criar/processar a música "${nomeMusica}".`, false, err.message);
 		}
 	});
 });
@@ -43,6 +43,7 @@ router.get('/musicas', auth, async (req, res) => {
 	}
 });
 
+// Pega os arquivos lrc, wav e json da música
 router.get('/musicas/arquivos/:id', auth, async (req, res) => {
   const { id } = req.params;
   try {
@@ -101,11 +102,10 @@ router.delete('/musicas/:id', auth, async (req, res) => {
 });
 
 // Verifica se música existe no banco 
-router.get('/musicas/:nomeMusica', auth, async (req, res) => {
+router.get('/musicas/:nomeMusica', async (req, res) => {
 	const { nomeMusica } = req.params;
 	try {
-		const musica_slug = musicaService.gerarSlug(nomeMusica);
-		const existe = await musicaService.verificarMusicaExiste(musica_slug);
+		const existe = await musicaService.verificarMusicaExiste(nomeMusica);
 		res.json({ musicaExiste: existe });
 	} catch (err) {
 		console.error('Erro ao verificar existência da música:', err);
