@@ -73,7 +73,22 @@
 					<canvas ref="staffCanvas" width="1200" height="200" class="staff-canvas"></canvas>
 				</div>
 
-				<!-- REMOVIDO: qualquer container vazio acima das letras -->
+				<!-- Indicador de Microfone -->
+				<div v-if="microfoneAtivo" class="mic-indicator">
+					<div class="mic-status">
+						<div class="mic-level-bar">
+							<div class="mic-level-fill" :style="{ width: micLevel + '%' }"></div>
+						</div>
+						<div class="mic-info">
+							<span class="mic-label">🎤 Nível:</span>
+							<span class="mic-value">{{ micLevel.toFixed(0) }}%</span>
+							<span v-if="detectedFreq > 0" class="freq-info">
+								| Freq: {{ detectedFreq.toFixed(1) }}Hz | Nota: {{ detectedNote }}
+							</span>
+							<span v-else class="freq-info no-signal">| Aguardando voz...</span>
+						</div>
+					</div>
+				</div>
 
 				<div class="lyrics-container">
 					<div class="lyrics-scroll" ref="lyricsScroll">
@@ -174,16 +189,15 @@ function drawRoll(ctx, W, H, {
 }) {
 	drawStaffBase(ctx, W, H);
 
-	const tStart = tCenterMs - windowPastMs;      // início da janela
-	const tEnd   = tCenterMs + windowFutureMs;    // fim da janela
-	const spanMs = windowPastMs + windowFutureMs; // largura temporal
+	const tStart = tCenterMs - windowPastMs;
+	const tEnd   = tCenterMs + windowFutureMs;
+	const spanMs = windowPastMs + windowFutureMs;
 	const margin = 20;
 	const plotW = W - margin * 2;
 
-	// função x(t) mapeando ms -> px do canvas
 	const xOfTime = t => margin + ((t - tStart) / spanMs) * plotW;
 
-	// 1) desenhar REF (azul) dentro da janela
+	// 1) desenhar REF (azul)
 	ctx.lineWidth = 2;
 	ctx.strokeStyle = "#60a5fa";
 	ctx.beginPath();
@@ -201,7 +215,6 @@ function drawRoll(ctx, W, H, {
 	}
 	ctx.stroke();
 
-	// Marcadores pequenos no REF
 	ctx.fillStyle = "#60a5fa";
 	for (let i = 0; i < refTimesMs.length; i++) {
 		const t = refTimesMs[i];
@@ -215,7 +228,7 @@ function drawRoll(ctx, W, H, {
 		ctx.fill();
 	}
 
-	// 2) desenhar USER (laranja), alinhado pelo índice global (t -> idx)
+	// 2) desenhar USER (laranja)
 	ctx.lineWidth = 2;
 	ctx.strokeStyle = "#f59e0b";
 	ctx.beginPath();
@@ -247,7 +260,7 @@ function drawRoll(ctx, W, H, {
 		ctx.fill();
 	}
 
-	// Linha de “agora”
+	// Linha de "agora"
 	ctx.strokeStyle = "rgba(229,231,235,0.8)";
 	ctx.lineWidth = 1;
 	ctx.setLineDash([6, 4]);
@@ -296,23 +309,32 @@ export default {
         	currentLineRef: null,
 
 			// notes.json & piano-roll contínuo
-			notesJson: null,     // { version, a4_hz, hop_ms, segments: [...] }
+			notesJson: null,
 			a4hz: 440,
 			hopMs: 10,
-			// timeline global (referência)
-			refTimesMs: [],      // [t0, t1, ...] ao longo da música
-			refCents: [],        // mesmo tamanho de refTimesMs
+			refTimesMs: [],
+			refCents: [],
 			refStartMs: 0,
 			refEndMs: 0,
-			// usuário (alinhado pelo tempo global)
-			userCentsGlobal: [], // indexado por frame: i -> refStartMs + i*hopMs
+			userCentsGlobal: [],
 
-			// janela de visualização (rolagem)
+			// janela de visualização
 			windowPastMs: 1500,
 			windowFutureMs: 3500,
 
 			// throttle de redesenho
-			staffDrawReq: 0
+			staffDrawReq: 0,
+			
+			// média móvel para pitch
+			pitchHistory: [],
+			
+			// indicadores visuais de microfone
+			micLevel: 0,
+			detectedFreq: 0,
+			detectedNote: '-',
+			
+			// controle de pontuação
+			lastScoredIdx: -100
 		};
 	},
 	computed: {
@@ -338,7 +360,6 @@ export default {
 				const resp = await api.get(`/musicas/arquivos/${musicaId}`, { responseType: 'arraybuffer' });
 				const zipBuffer = resp.data;
 
-				// JSZip via CDN se não existir
 				if (!window.JSZip) {
 					await new Promise((resolve, reject) => {
 						const s = document.createElement('script');
@@ -366,7 +387,7 @@ export default {
 					notesEntry.async('text')
 				]);
 
-				// Parse notes.json e constrói timeline global
+				// Parse notes.json
 				this.notesJson = JSON.parse(notesText);
 				this.a4hz = this.notesJson?.a4_hz || 440;
 				this.hopMs = this.notesJson?.hop_ms || 10;
@@ -383,10 +404,8 @@ export default {
 				this.refStartMs = this.refTimesMs.length ? this.refTimesMs[0] : 0;
 				this.refEndMs   = this.refTimesMs.length ? this.refTimesMs[this.refTimesMs.length - 1] : 0;
 
-				// aloca buffer do usuário com mesmo número de frames (preenche null)
 				this.userCentsGlobal = new Array(this.refTimesMs.length).fill(null);
 
-				// Áudio instrumental
 				if (this._audioObjectUrl) URL.revokeObjectURL(this._audioObjectUrl);
 				this._audioObjectUrl = URL.createObjectURL(new Blob([instrBlob], { type: 'audio/wav' }));
 
@@ -423,7 +442,7 @@ export default {
 				this.audioInstrumental.addEventListener('timeupdate', () => {
 					this.tempoAtual = this.audioInstrumental.currentTime;
 					this.atualizarLinhaAtual();
-					this.requestStaffDraw(); // redesenha a janela do piano-roll
+					this.requestStaffDraw();
 				});
 
 				this.audioInstrumental.addEventListener('ended', () => {
@@ -451,7 +470,6 @@ export default {
 				const textoLimpo = conteudo.replace(/\([A-G][#♯♭b]?\d+\)/g, '').trim();
 				this.letras.push({ tempo, texto: textoLimpo });
 
-				// compat: mantém anotações (se houver)
 				const notasRegex = /\(([A-G][#♯♭b]?\d+)\)/g;
 				let notaMatch;
 				while ((notaMatch = notasRegex.exec(conteudo)) !== null) {
@@ -470,17 +488,26 @@ export default {
 			if (!this.microfoneAtivo) {
 				try {
 					this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-					const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+					const stream = await navigator.mediaDevices.getUserMedia({ 
+						audio: {
+							echoCancellation: true,
+							noiseSuppression: true,
+							autoGainControl: true,
+							sampleRate: 44100
+						}
+					});
 
 					this.microphone = this.audioContext.createMediaStreamSource(stream);
 					this.analyser = this.audioContext.createAnalyser();
-					this.analyser.fftSize = 2048;
+					this.analyser.fftSize = 4096;
+					this.analyser.smoothingTimeConstant = 0.8;
 
 					this.microphone.connect(this.analyser);
 					this.microfoneAtivo = true;
+					this.pitchHistory = [];
 					this.detectarPitch();
 				} catch (err) {
-					alert('Erro ao acessar microfone');
+					alert('Erro ao acessar microfone: ' + err.message);
 				}
 			} else {
 				this.microfoneAtivo = false;
@@ -501,28 +528,45 @@ export default {
 				if (!this.microfoneAtivo) return;
 
 				this.analyser.getFloatTimeDomainData(buffer);
+				
+				// Calcular nível de áudio (RMS)
+				let rms = 0;
+				for (let i = 0; i < buffer.length; i++) {
+					rms += buffer[i] * buffer[i];
+				}
+				rms = Math.sqrt(rms / buffer.length);
+				this.micLevel = Math.min(100, rms * 1000);
+				
 				const freqHz = this.autoCorrelate(buffer, this.audioContext.sampleRate);
 
-				if (freqHz > -1) {
-					// 1) conversão para cents
-					const cents = hzToCents(freqHz, this.a4hz);
+				if (freqHz > -1 && freqHz >= 80 && freqHz <= 1200) {
+					if (!this.pitchHistory) this.pitchHistory = [];
+					this.pitchHistory.push(freqHz);
+					if (this.pitchHistory.length > 5) this.pitchHistory.shift();
+					
+					const avgFreq = this.pitchHistory.reduce((a, b) => a + b, 0) / this.pitchHistory.length;
+					
+					this.detectedFreq = avgFreq;
+					this.detectedNote = this.frequenciaParaNota(avgFreq);
 
-					// 2) posicionamento visual legado (nome de nota)
-					const notaNome = this.frequenciaParaNota(freqHz);
+					const cents = hzToCents(avgFreq, this.a4hz);
+					const notaNome = this.frequenciaParaNota(avgFreq);
 					this.notaCantada = { nome: notaNome, y: this.notaParaY(notaNome) };
 
-					// 3) grava no buffer global do usuário com base no tempo atual
 					const tMs = this.tempoAtual * 1000;
 					const idx = Math.round((tMs - this.refStartMs) / this.hopMs);
 					if (idx >= 0 && idx < this.userCentsGlobal.length) {
 						this.userCentsGlobal[idx] = cents;
 					}
 
-					// 4) redesenha o piano-roll contínuo
 					this.requestStaffDraw();
-
-					// 5) scoring legado por nome (mantido)
 					this.verificarAcerto(notaNome);
+				} else {
+					this.detectedFreq = 0;
+					this.detectedNote = '-';
+					if (this.pitchHistory && this.pitchHistory.length > 0) {
+						this.pitchHistory = [];
+					}
 				}
 
 				requestAnimationFrame(detectar);
@@ -569,32 +613,44 @@ export default {
 				rms += buffer[i] * buffer[i];
 			}
 			rms = Math.sqrt(rms / size);
-			if (rms < 0.01) return -1;
+			
+			if (rms < 0.003) return -1;
+
+			const normalizedBuffer = new Float32Array(size);
+			for (let i = 0; i < size; i++) {
+				normalizedBuffer[i] = buffer[i] / rms;
+			}
 
 			let lastCorrelation = 1;
-			for (let offset = 1; offset < maxSamples; offset++) {
+			const minOffset = Math.floor(sampleRate / 1200);
+			const maxOffset = Math.floor(sampleRate / 80);
+
+			for (let offset = minOffset; offset < Math.min(maxOffset, maxSamples); offset++) {
 				let correlation = 0;
 				for (let i = 0; i < maxSamples; i++) {
-					correlation += Math.abs(buffer[i] - buffer[i + offset]);
+					correlation += Math.abs(normalizedBuffer[i] - normalizedBuffer[i + offset]);
 				}
 				correlation = 1 - correlation / maxSamples;
 
-				if (correlation > 0.9 && correlation > lastCorrelation) {
+				if (correlation > 0.7 && correlation > lastCorrelation) {
 					if (correlation > bestCorrelation) {
 						bestCorrelation = correlation;
 						bestOffset = offset;
 					}
+				} else if (correlation > bestCorrelation && correlation > 0.85) {
+					bestCorrelation = correlation;
+					bestOffset = offset;
 				}
+				
 				lastCorrelation = correlation;
 			}
 
-			if (bestCorrelation > 0.01) {
+			if (bestCorrelation > 0.01 && bestOffset > 0) {
 				return sampleRate / bestOffset;
 			}
 			return -1;
 		},
 
-		// ====== funções legadas (mantidas) ======
 		frequenciaParaNota(freq) {
 			const A4 = 440;
 			const C0 = A4 * Math.pow(2, -4.75);
@@ -627,15 +683,38 @@ export default {
 		},
 
 		verificarAcerto(notaCantada) {
-			const notasAtivas = this.notasVisiveis.filter(n => n.ativa && n.acertou === null);
-
-			notasAtivas.forEach(nota => {
-				if (this.compararNotas(notaCantada, nota.nome)) {
-					nota.acertou = true;
+			if (!this.refTimesMs || this.refTimesMs.length === 0) return;
+			
+			const tMs = this.tempoAtual * 1000;
+			const userCents = hzToCents(this.detectedFreq, this.a4hz);
+			
+			if (!userCents) return;
+			
+			// Encontrar o índice mais próximo do tempo atual
+			const idx = Math.round((tMs - this.refStartMs) / this.hopMs);
+			if (idx < 0 || idx >= this.refCents.length) return;
+			
+			// Pegar a nota de referência no tempo atual
+			const refCents = this.refCents[idx];
+			if (refCents == null) return;
+			
+			// Calcular a diferença em cents (50 cents = meio semitom, tolerância razoável)
+			const diffCents = Math.abs(userCents - refCents);
+			
+			// Se a diferença for menor que 50 cents (meio semitom), considera acerto
+			if (diffCents <= 50) {
+				// Verificar se já não pontuou neste frame recentemente
+				const lastScoreIdx = this.lastScoredIdx || -100;
+				if (idx - lastScoreIdx > 5) { // Só pontua a cada 5 frames (50ms)
 					this.acertos++;
-					this.pontuacaoTotal = (this.acertos / this.totalNotas) * 100;
+					this.lastScoredIdx = idx;
+					
+					// Recalcular pontuação total baseado nos frames processados
+					const framesProcessados = Math.max(1, idx);
+					this.pontuacaoTotal = (this.acertos / framesProcessados) * 100 * 10; // Multiplicador para melhor visualização
+					this.pontuacaoTotal = Math.min(100, this.pontuacaoTotal); // Limita a 100%
 				}
-			});
+			}
 		},
 
 		compararNotas(nota1, nota2) {
@@ -652,7 +731,6 @@ export default {
 					break;
 				}
 			}
-			// rolagem das letras (centraliza linha ativa)
 			this.$nextTick(() => {
 				if (this.currentLineRef && this.$refs.lyricsScroll) {
 					const container = this.$refs.lyricsScroll;
@@ -734,7 +812,6 @@ export default {
 </script>
 
 <style scoped>
-/* Reset e wrapper principal */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 .karaoke-wrapper {
@@ -749,7 +826,6 @@ export default {
 	background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
 }
 
-/* Barra de título */
 .title-bar {
 	height: 32px;
 	background: rgba(0, 0, 0, 0.1);
@@ -771,7 +847,6 @@ export default {
 .title-bar-button.close:hover { background: #e81123; color: white; }
 .title-bar-button svg { width: 16px; height: 16px; }
 
-/* Container principal */
 .karaoke-container {
 	flex: 1;
 	width: 100%;
@@ -820,18 +895,68 @@ export default {
 .score-display { display: flex; flex-direction: column; align-items: center; padding: 0.5rem 1.5rem; background: rgba(72, 187, 120, 0.2); border-radius: 12px; border: 2px solid #48bb78; }
 .score-value { font-size: 1.8rem; font-weight: 700; color: #48bb78; }
 
-/* Piano-roll */
 .staff-container {
 	height: 200px;
 	background: rgba(0, 0, 0, 0.2);
 	padding: 1rem;
-	margin: 1rem 2rem;
+	margin: 1rem 2rem 0.5rem 2rem;
 	border-radius: 16px;
 	flex-shrink: 0;
 }
 .staff-canvas { width: 100%; height: 100%; display: block; border-radius: 16px; background: rgba(0,0,0,0.2); }
 
-/* Letras */
+.mic-indicator {
+	margin: 0.5rem 2rem 1rem 2rem;
+	padding: 1rem 1.5rem;
+	background: rgba(0, 0, 0, 0.3);
+	border-radius: 12px;
+	border: 2px solid rgba(72, 187, 120, 0.3);
+	flex-shrink: 0;
+}
+.mic-status {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+.mic-level-bar {
+	height: 12px;
+	background: rgba(255, 255, 255, 0.1);
+	border-radius: 6px;
+	overflow: hidden;
+	position: relative;
+}
+.mic-level-fill {
+	height: 100%;
+	background: linear-gradient(90deg, #48bb78 0%, #38a169 50%, #f59e0b 100%);
+	border-radius: 6px;
+	transition: width 0.1s ease;
+	box-shadow: 0 0 10px rgba(72, 187, 120, 0.5);
+}
+.mic-info {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	font-size: 0.95rem;
+	color: rgba(255, 255, 255, 0.9);
+}
+.mic-label {
+	font-weight: 600;
+	color: #48bb78;
+}
+.mic-value {
+	font-weight: 700;
+	color: #48bb78;
+	min-width: 40px;
+}
+.freq-info {
+	color: rgba(255, 255, 255, 0.7);
+	font-family: 'Courier New', monospace;
+}
+.freq-info.no-signal {
+	color: rgba(255, 255, 255, 0.4);
+	font-style: italic;
+}
+
 .lyrics-container {
     flex: 1;
     display: flex;
@@ -854,7 +979,6 @@ export default {
 .lyric-line { font-size: 2rem; margin: 1rem 0; opacity: 0.3; transition: all 0.3s; }
 .lyric-line.active { opacity: 1; font-size: 2.5rem; font-weight: 700; color: #48bb78; }
 
-/* Controles */
 .controls { display: flex; align-items: center; gap: 1.5rem; padding: 1.5rem 2rem; background: rgba(0, 0, 0, 0.3); }
 .btn-play, .btn-mic { width: 56px; height: 56px; border: none; background: #667eea; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .btn-mic.active { background: #48bb78; }
