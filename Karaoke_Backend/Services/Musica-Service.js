@@ -1,5 +1,5 @@
 const Musica = require('../Models/Musica-Model');
-const artistaService = require('../Models/Artista-Service');
+const artistaService = require('../Services/Artista-Service');
 const StatusMusica = require('../Helpers/Musica-Helper');
 const { Op } = require('sequelize');
 const axios = require('axios');
