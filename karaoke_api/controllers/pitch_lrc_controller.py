@@ -83,7 +83,6 @@ def gerar_json_notas(lrc_path, wav_path, output_dir="temp", confidence_threshold
     """
     os.makedirs(output_dir, exist_ok=True)
     base_name = os.path.splitext(os.path.basename(lrc_path))[0]
-    song_id = base_name
 
     # 1) Ler LRC
     segments_lrc = ler_lrc(lrc_path)
@@ -130,7 +129,6 @@ def gerar_json_notas(lrc_path, wav_path, output_dir="temp", confidence_threshold
                 "end_ms": int(round(end_s * 1000)),
                 "text": text,
                 "cents": [],
-                "voiced": [],
                 "conf": [],
                 "hist_chroma": [0.0]*12,
                 "conf_mean": 0.0
@@ -164,10 +162,8 @@ def gerar_json_notas(lrc_path, wav_path, output_dir="temp", confidence_threshold
 
         # Preparar arrays para JSON: cents -> lista com None onde não vozeado
         cents_list = []
-        voiced_list = []
         conf_list = []
         for i in range(len(idx)):
-            voiced_list.append(int(voiced_seg[i]))
             conf_list.append(float(conf_seg[i]))
             if voiced_seg[i] == 1 and np.isfinite(cents_seg[i]):
                 cents_list.append(float(cents_seg[i]))
@@ -180,7 +176,6 @@ def gerar_json_notas(lrc_path, wav_path, output_dir="temp", confidence_threshold
             "end_ms": int(round(end_s * 1000)),
             "text": text,
             "cents": cents_list,
-            "voiced": voiced_list,
             "conf": conf_list,
             "hist_chroma": [float(x) for x in hist.tolist()],
             "conf_mean": conf_mean

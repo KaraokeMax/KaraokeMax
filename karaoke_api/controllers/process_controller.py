@@ -39,7 +39,7 @@ def process_request(audio_file, lrc_file, artista_nome, musica_nome):
     
     voz_path, instrumental_path, lrc_final_path, json_path = process_audio_and_lrc(audio_path, lrc_path)
 
-    upload_to_b2( voz_path, instrumental_path, lrc_final_path, json_path, artista_nome, musica_nome, id_job)
+    upload_to_b2(voz_path, instrumental_path, lrc_final_path, json_path, artista_nome, musica_nome, id_job)
 
     print("[PROCESS] Antes de cleanup_temp_folder")
     cleanup_temp_folder()
