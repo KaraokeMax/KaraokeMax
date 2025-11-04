@@ -4,6 +4,7 @@ import TelaPrincipal from "../views/TelaPrincipal.vue";
 import TelaMusicas from "../views/TelaMusicas.vue";
 import TelaKaraoke from "../views/TelaKaraoke.vue";
 import TelaDefinirSenha from "../views/TelaDefinirSenha.vue";
+import TelaAdicionarMusica from "../views/TelaAdicionarMusica.vue";
 
 const routes = [
 	{
@@ -34,6 +35,12 @@ const routes = [
 		component: TelaKaraoke,
 		props: route => ({ id: route.query.id})
 	},
+	{
+		path: "/adicionarMusica",
+		name: "AdicionarMusica",
+		component: TelaAdicionarMusica,
+		meta: { requiresAuth: true }
+	}
 ];
 
 const router = createRouter({
