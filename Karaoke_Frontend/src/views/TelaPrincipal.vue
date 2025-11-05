@@ -30,6 +30,8 @@
                         <div class="notification-title">Notificações</div>
                         <ul class="notification-list">
                             <li v-for="(n, idx) in notificacoes" :key="idx" class="notification-item">
+                                <p v-if="n.sucesso"><strong>Sucesso!</strong></p>
+                                <p v-else><strong>Erro!</strong></p>
                                 {{ n.mensagem }}
                             </li>
                             <li v-if="!notificacoes.length" class="notification-item empty">Nenhuma notificação</li>
@@ -125,6 +127,7 @@ export default {
         },
         irParaTelaInicial() {
             this.telaAtual = null;
+            this.buscaInfoUser();
         },
         minimizeWindow() {
             if (window.electronAPI) {
@@ -167,17 +170,19 @@ export default {
                 this.notificacoes = [];
                 document.removeEventListener('mousedown', this.handleClickOutside);
             }
+        },
+        async buscaInfoUser() {
+            try {
+                const response = await api.get('/usuarios/me');
+                this.usuario = response.data;
+            } catch (error) {
+                console.error('Erro ao buscar informações do usuário:', error);
+            }
         }
     },
     async mounted() {
         this.checkMaximizedState();
-        try {
-            const response = await api.get('/usuarios/me');
-            this.usuario = response.data;
-            this.notificacoes = this.usuario.notificacoes || [];
-        } catch (error) {
-            console.error('Erro ao buscar usuário:', error);
-        }
+        await this.buscaInfoUser();
     },
     beforeDestroy() {
         document.removeEventListener('mousedown', this.handleClickOutside);
