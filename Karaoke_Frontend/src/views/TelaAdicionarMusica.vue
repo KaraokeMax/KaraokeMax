@@ -17,15 +17,15 @@
             </div>
 
             <div v-if="songs.length > 0" class="results">
-                <div v-for="song in songs" :key="song.id" class="song-item">
-                    <div class="song-info">
+                <div v-for="song in songs" :key="song.id" :class="!lrcSelecionada? 'song-item' : 'song-item-selecionado'">
+					<div class="song-info">
                         <h3>{{ song.title }}</h3>
                         <p>
                           {{ song.artist }}
                           <span v-if="song.duration"> • {{ formatDuration(song.duration) }}</span>
                         </p>
                     </div>
-                    <button @click="selectSong(song)">Selecionar</button>
+                    <button @click="selectSong(song)" v-if="!lrcSelecionada">Selecionar</button>
                 </div>
             </div>
 
@@ -104,6 +104,7 @@ export default {
       this.loading = true;
       this.songs = [];
 	  this.selectedSong = null;
+	  this.lrcSelecionada = null;
 
       try {
         const response = await axios.get('https://lrclib.net/api/search', {
@@ -227,7 +228,7 @@ export default {
     flex: 1 1 auto;
     overflow: auto;
     margin: 20px 10px;
-	padding-right: 10px;
+	  padding-right: 10px;
 }
 
 .search-box {
@@ -271,8 +272,19 @@ button:disabled {
     align-items: center;
     padding: 15px;
     background: rgba(0,0,0,0.08);
-    margin: 12px 0;
+    margin: 12px 4px;
     border-radius: 6px;
+}
+
+.song-item-selecionado {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: rgba(95, 16, 148, 0.3);
+    margin: 12px 4px;
+    border-radius: 6px;
+	box-shadow: 0 0 4px rgba(255, 255, 255, 0.9);;
 }
 
 .song-info h3 {
