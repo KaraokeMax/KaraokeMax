@@ -5,6 +5,7 @@ const { Op } = require('sequelize');
 const axios = require('axios');
 const urlPythonServer = process.env.PYTHON_SERVER_URL;
 const notificacaoService = require('./Notificacao-Service');
+const { toSlug } = require('../Helpers/Slug-Helper');
 
 async function criarMusica(nome, nomeArtista, audioFile, lrcFile) {
 	const artista = await artistaService.criarArtista(nomeArtista);

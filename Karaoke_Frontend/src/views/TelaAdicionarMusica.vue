@@ -29,14 +29,22 @@
                 </div>
             </div>
 
-            <div v-if="selectedSong" class="youtube-section">
-                <h3>Insira o link do YouTube para "{{ selectedSong.title }}"</h3>
-                <input 
-                    v-model="youtubeUrl" 
-                    type="text" 
-                    placeholder="Cole o link do YouTube aqui..."
-                >
-                <button @click="processMusic" :disabled="!youtubeUrl">Processar Música</button>
+            <!-- Botão -->
+            <div class="upload-button" @click="openFilePicker">
+                <strong>🎶 {{ file ? 'Trocar arquivo MP3' : 'Selecionar arquivo MP3' }} </strong>
+                <div class="file-info" v-if="fileInfo">
+                    <p><strong>Nome: </strong> {{ fileInfo.name }} </p>
+                    <p><strong>Duração: </strong> {{ fileInfo.duration }}</p>
+                </div>
+            </div>
+
+            <!-- input escondido -->
+            <input type="file" ref="fileInput" accept=".mp3" style="display: none" @change="handleFileSelected" />
+
+            <div class="process-button" @click="processMusic">
+                <button>
+                    Processar Música
+                </button>
             </div>
         </div>
     </div>
@@ -44,101 +52,142 @@
 
 <script>
 import axios from 'axios';
+import api from '../services/api';
 
 export default {
-    name: 'TelaAdicionarMusica',
-    data() {
-        return {
-            searchQuery: '',
-            songs: [],
-            loading: false,
-            selectedSong: null,
-            youtubeUrl: ''
-        }
+  name: 'TelaAdicionarMusica',
+  data() {
+    return {
+      searchQuery: '',
+      songs: [],
+      loading: false,
+      selectedSong: null,
+      lrcSelecionada: null,
+      file: null,
+      fileInfo: null,
+    };
+  },
+  methods: {
+    openFilePicker() {
+      // usa a ref do template
+      this.$refs.fileInput && this.$refs.fileInput.click();
     },
-    methods: {
-        async searchSongs() {
-            if (!this.searchQuery) return;
-            
-            this.loading = true;
-            this.songs = [];
-            
-                        try {
-                const response = await axios.get(`https://lrclib.net/api/search`, {
-                    params: {
-                        q: this.searchQuery
-                    }
-                });
-                console.log(response.data);
-                
-                                // Normalize API result to the fields used in the template (title, artist, id, duration)
-                this.songs = response.data.map(s => {
-                    const id = s.id || s.trackId || s.track_id || null;
-                    const title = s.name || s.trackName || s.title || 'Sem título';
-                    const artist = s.artist || s.artistName || (Array.isArray(s.artists) ? s.artists.join(', ') : '') || 'Desconhecido';
 
-                    // Try to extract duration (in seconds). Many APIs use duration, length, time or duration_ms.
-                    const rawDur = s.duration ?? s.length ?? s.time ?? s.duration_ms ?? s.trackLength ?? s.track_duration ?? s.trackDuration;
-                    let durationSeconds = null;
+    handleFileSelected(event) {
+      const selectedFile = event.target.files?.[0];
+      if (!selectedFile) return;
 
-                    if (typeof rawDur === 'number') {
-                        // Heuristic: if number is large, assume milliseconds
-                        durationSeconds = rawDur > 10000 ? Math.round(rawDur / 1000) : rawDur;
-                    } else if (typeof rawDur === 'string') {
-                        // If already "mm:ss", convert; else try numeric parse
-                        if (/^\d+:\d{2}$/.test(rawDur)) {
-                            const parts = rawDur.split(':').map(Number);
-                            durationSeconds = parts[0] * 60 + parts[1];
-                        } else {
-                            const num = Number(rawDur);
-                            if (!isNaN(num)) durationSeconds = num > 10000 ? Math.round(num / 1000) : num;
-                        }
-                    }
+      this.file = selectedFile;
 
-                    return {
-                        id,
-                        title,
-                        artist,
-                        duration: durationSeconds
-                    };
-                });
-            } catch (error) {
-                console.error('Error searching songs:', error);
-            } finally {
-                this.loading = false;
-            }
-        },
-        
-        selectSong(song) {
-            this.selectedSong = song;
-        },
-        
-        async processMusic() {
-            if (!this.youtubeUrl || !this.selectedSong) return;
-            
-            try {
-                // Here you would call your backend API to process the YouTube video
-                const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/process-music`, {
-                    youtubeUrl: this.youtubeUrl,
-                    songId: this.selectedSong.id
-                });
-                                
-                console.log('Music processed successfully:', response.data);
-            } catch (error) {
-                console.error('Error processing music:', error);
-            }
-        },
+      const url = URL.createObjectURL(selectedFile);
+      const audio = new Audio(url);
 
-        formatDuration(seconds) {
-            if (seconds === null || seconds === undefined) return '';
-            if (typeof seconds !== 'number') return String(seconds);
-            const m = Math.floor(seconds / 60);
-            const s = String(seconds % 60).padStart(2, '0');
-            return `${m}:${s}`;
+      audio.addEventListener('loadedmetadata', () => {
+        this.fileInfo = {
+          name: selectedFile.name,
+          size: (selectedFile.size / 1024).toFixed(1),   // KB
+          duration: this.formatDuration(audio.duration), // segundos
+        };
+        URL.revokeObjectURL(url); // evita vazamento de memória
+      });
+
+      // (opcional) tratar erro de metadata
+      audio.addEventListener('error', () => {
+        console.error('Não foi possível ler metadados do áudio.');
+        URL.revokeObjectURL(url);
+      });
+    },
+
+    async searchSongs() {
+      if (!this.searchQuery) return;
+
+      this.loading = true;
+      this.songs = [];
+
+      try {
+        const response = await axios.get('https://lrclib.net/api/search', {
+          params: { q: this.searchQuery }
+        });
+        const data = (response.data || []).filter(s => s.syncedLyrics != null);
+
+        if (data.length === 0) {
+          alert('Não foi possível encontrar músicas com letras sincronizadas. Tente outro termo de busca.');
+          return;
         }
+
+        this.songs = data.map(s => ({
+          id: s.id,
+          title: s.trackName,
+          artist: s.artistName,
+          duration: Math.floor(s.duration),
+          lrc: s.syncedLyrics,
+        }));
+      } catch (error) {
+        console.error('Error searching songs:', error);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async selectSong(song) {
+      const resp = await api.get(`/musicas/${song.title}`);
+      if (resp.data.musicaExiste) {
+        alert('A música já está cadastrada no sistema.');
+        return;
+      }
+      this.selectedSong = song;
+      this.lrcSelecionada = song.lrc;
+    },
+
+    limparSelecao() {
+        this.selectedSong = null;
+        this.lrcSelecionada = null;
+        this.file = null;
+        this.fileInfo = null;
+    },
+
+    async processMusic() {
+        if (!this.selectedSong && !this.file) {
+            alert('Selecione uma música ou faça upload de um arquivo MP3.');
+            return;
+        }
+    
+        if (this.fileInfo.duration > this.selectedSong.duration + 10 || this.fileInfo.duration < this.selectedSong.duration - 10) {
+            alert('A duração do arquivo MP3 é muito diferente da duração da música selecionada.');
+            return;
+        }
+
+        try {
+            const resp = await api.post('/musicas/adicionar', {
+                nomeMusica: this.selectedSong.title,
+                nomeArtista: this.selectedSong.artist,
+                lrc: this.lrcSelecionada,
+                audioFile: this.file,
+            });
+            if (resp.status !== 202) {
+                throw new Error('Erro ao adicionar música', resp.data);
+            }
+
+            alert('Música adicionada com sucesso!');
+            
+        } catch (error) {
+            console.error('Erro ao adicionar música:', error);
+            alert('Ocorreu um erro ao adicionar a música. Tente novamente.');
+        }     
+    },
+
+    formatDuration(seconds) {
+        if (seconds == null) return '';
+        if (typeof seconds !== 'number') return String(seconds);
+        const m = Math.floor(seconds / 60);
+        let s = String(seconds % 60).padStart(2, '0');
+        s = Math.floor(s);
+        return `${m}:${s}`;
     }
-}
+  }
+};
 </script>
+
 
 <style scoped>
 .container {
@@ -155,8 +204,8 @@ export default {
 .search-section {
     width: 100%;
     max-width: 1100px; /* ajuste conforme desejar; remova se quiser 100% */
-    height: 100%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    height: 85%;
+    background: transparent;
     padding: 30px;
     border-radius: 8px;
     color: white;
@@ -167,7 +216,7 @@ export default {
 .results {
     flex: 1 1 auto;
     overflow: auto;
-    margin-top: 10px;
+    margin: 10px;
 }
 
 .search-box {
@@ -236,4 +285,49 @@ button:disabled {
     padding: 20px;
     color: #bdc3c7;
 }
+
+.upload-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.upload-button {
+  background: rgba(228, 21, 255, 0.219);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+
+.upload-button:hover {
+  background-color: #9225eb;
+  transform: scale(1.03);
+}
+
+.file-info {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-top: 10px;
+  padding: 10px;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  color: #111827;
+  height: auto;
+}
+
+.file-info p {
+  margin: 6px 0;   /* controla o espaçamento entre parágrafos */
+  line-height: 1.4;
+}
+
+.process-button {
+  margin-top: 20px;
+  text-align: center;
+}
+
 </style>

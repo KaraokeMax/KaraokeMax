@@ -69,7 +69,8 @@
                     </button>
                 </nav>
             </aside>
-            <TelaMusicas v-if="mostrarMusicas" :key="mostrarMusicas"  />
+            <TelaMusicas v-if="telaAtual === 'EscolherMusica'" :key="telaAtual" />
+            <TelaAdicionarMusica v-else-if="telaAtual === 'AdicionarMusica'" />
             <section v-else class="menu-welcome">
                 <div class="welcome-content">
                     <h1>Bem-vindo ao KaraokeMax!</h1>
@@ -90,11 +91,13 @@
 <script>
 import api from '../services/api';
 import TelaMusicas from './TelaMusicas.vue';
+import TelaAdicionarMusica from './TelaAdicionarMusica.vue';
 
 export default {
     name: 'TelaPrincipal',
     components: {
-        TelaMusicas
+        TelaMusicas,
+        TelaAdicionarMusica
     },
     name: 'TelaPrincipal',
     data() {
@@ -102,7 +105,7 @@ export default {
             isMaximized: false,
             notificacoes: [],
             dropdownOpen: false,
-            mostrarMusicas: false,
+            telaAtual: null,
             musicas: [],
             search: '',
             loading: false,
@@ -112,16 +115,16 @@ export default {
     },
     methods: {
         irParaEscolherMusica() {
-            this.mostrarMusicas = true;
+            this.telaAtual = 'EscolherMusica';
         },
         irParaAdicionarMusica() {
-            this.$router.push({ name: 'AdicionarMusica' });
+            this.telaAtual = 'AdicionarMusica';
         },
         irParaPontuacoes() {
             this.$router.push({ name: 'Pontuacoes' });
         },
         irParaTelaInicial() {
-            this.mostrarMusicas = false;
+            this.telaAtual = null;
         },
         minimizeWindow() {
             if (window.electronAPI) {
