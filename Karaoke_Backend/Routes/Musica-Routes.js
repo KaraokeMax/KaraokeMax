@@ -5,17 +5,23 @@ const router = express.Router();
 const musicaService = require('../Services/Musica-Service');
 const auth = require('../middleware/auth');
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
 const notificacaoService = require('../Services/Notificacao-Service');
+const fs = require('fs');
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, 'uploads/'),
+  filename: (req, file, cb) => cb(null, file.originalname)
+});
+const upload = multer({ storage });
 
 // Criar música
-router.post('/musicas', upload.fields([{ name: 'audio' }, { name: 'lrc' }]), (req, res) => {
+router.post('/musicas', auth, upload.fields([{ name: 'audio' }]), (req, res) => {
 	if (!req.usuario) return res.status(401).json({ error: 'Usuário não autenticado.' });
 
-	const { nomeMusica, nomeArtista } = req.body;
+	const { nomeMusica, nomeArtista, lrc } = req.body;
 	const audioFile = req.files['audio']?.[0];
-	const lrcFile = req.files['lrc']?.[0];
-	if (!nomeMusica || !nomeArtista || !audioFile || !lrcFile) {
+	
+	if (!nomeMusica || !nomeArtista || !audioFile || !lrc) {
 		return res.status(400).json({ error: 'Estão faltando informações.' });
 	}
 
@@ -23,10 +29,9 @@ router.post('/musicas', upload.fields([{ name: 'audio' }, { name: 'lrc' }]), (re
 
 	setImmediate(async () => {
 		try {
-			await musicaService.criarMusica(nomeMusica, nomeArtista, audioFile, lrcFile);
+			await musicaService.criarMusica(nomeMusica, nomeArtista, audioFile, lrc);
 		} catch (err) {
 			console.error('Erro ao criar/processar música (assíncrono):', err);
-			await musicaService.alteraStatusMusica(musica.id, StatusMusica.ERRO);
 			await notificacaoService.criarNotificacao(req.usuario.id, null, `Erro ao criar/processar a música "${nomeMusica}".`, false, err.message);
 		}
 	});

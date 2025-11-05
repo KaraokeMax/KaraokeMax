@@ -14,10 +14,10 @@ def index():
 # Nova rota que recebe nome da música e artista, e salva arquivos no B2
 @app.route("/process", methods=["POST"])
 def process_audio():
-    # Recebe arquivos e dados extras
+    print("[REQUEST RECEIVED] Processing audio and LRC files...")
+
     if "audio" not in request.files or "lrc" not in request.files or "musica" not in request.form or "artista" not in request.form:
         return jsonify({"error": "Estão faltando arquivos ou informações"}), 400
-
 
     audio_file = request.files["audio"]
     lrc_file = request.files["lrc"]

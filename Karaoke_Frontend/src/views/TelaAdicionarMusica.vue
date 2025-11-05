@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         <div class="search-section">
-            <h2>Adicionar Nova Música</h2>
+            <h2 class="titulo-pagina">Adicionar Nova Música</h2>
             <div class="search-box">
                 <input 
                     v-model="searchQuery" 
@@ -41,9 +41,9 @@
             <!-- input escondido -->
             <input type="file" ref="fileInput" accept=".mp3" style="display: none" @change="handleFileSelected" />
 
-            <div class="process-button" @click="processMusic">
-                <button>
-                    Processar Música
+            <div class="process-div">
+                <button @click="processMusic" class="process-button">
+                  Processar Música
                 </button>
             </div>
         </div>
@@ -103,6 +103,7 @@ export default {
 
       this.loading = true;
       this.songs = [];
+	  this.selectedSong = null;
 
       try {
         const response = await axios.get('https://lrclib.net/api/search', {
@@ -117,7 +118,7 @@ export default {
 
         this.songs = data.map(s => ({
           id: s.id,
-          title: s.trackName,
+          title: s.name + " - " + s.albumName,
           artist: s.artistName,
           duration: Math.floor(s.duration),
           lrc: s.syncedLyrics,
@@ -137,6 +138,7 @@ export default {
       }
       this.selectedSong = song;
       this.lrcSelecionada = song.lrc;
+	  this.songs = this.songs.filter(s => s.id === song.id);
     },
 
     limparSelecao() {
@@ -158,17 +160,19 @@ export default {
         }
 
         try {
-            const resp = await api.post('/musicas/adicionar', {
-                nomeMusica: this.selectedSong.title,
-                nomeArtista: this.selectedSong.artist,
-                lrc: this.lrcSelecionada,
-                audioFile: this.file,
-            });
-            if (resp.status !== 202) {
-                throw new Error('Erro ao adicionar música', resp.data);
-            }
+			const formData = new FormData();
+			formData.append('audio', this.file);
+			formData.append('lrc', this.lrcSelecionada);
+			formData.append('nomeMusica', this.selectedSong.title);
+			formData.append('nomeArtista', this.selectedSong.artist);
 
-            alert('Música adicionada com sucesso!');
+			const resp = await api.post('/musicas', formData);
+
+			if (resp.status !== 202) {
+				throw new Error('Erro ao adicionar música', resp.data);
+			}
+
+			alert('Música adicionada com sucesso!');
             
         } catch (error) {
             console.error('Erro ao adicionar música:', error);
@@ -201,11 +205,17 @@ export default {
     justify-content: center;
 }
 
+.titulo-pagina {
+    color: white;
+    margin-bottom: 40px;
+	font-size: 2rem;
+	text-align: center;
+}
+
 .search-section {
-    width: 100%;
+    width: 90%;
     max-width: 1100px; /* ajuste conforme desejar; remova se quiser 100% */
-    height: 85%;
-    background: transparent;
+    height: 90%;
     padding: 30px;
     border-radius: 8px;
     color: white;
@@ -216,7 +226,8 @@ export default {
 .results {
     flex: 1 1 auto;
     overflow: auto;
-    margin: 10px;
+    margin: 20px 10px;
+	padding-right: 10px;
 }
 
 .search-box {
@@ -260,7 +271,7 @@ button:disabled {
     align-items: center;
     padding: 15px;
     background: rgba(0,0,0,0.08);
-    margin: 10px 0;
+    margin: 12px 0;
     border-radius: 6px;
 }
 
@@ -272,12 +283,6 @@ button:disabled {
 .song-info p {
     margin: 5px 0 0;
     color: #bdc3c7;
-}
-
-.youtube-section {
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid #34495e;
 }
 
 .loading {
@@ -294,7 +299,7 @@ button:disabled {
 }
 
 .upload-button {
-  background: rgba(228, 21, 255, 0.219);
+  background: rgba(158, 19, 238, 0.274);
   color: white;
   padding: 12px 20px;
   border-radius: 10px;
@@ -325,9 +330,22 @@ button:disabled {
   line-height: 1.4;
 }
 
-.process-button {
+.process-div {
   margin-top: 20px;
   text-align: center;
+}
+
+.process-button {
+  font-size: medium;
+  padding: 15px 35px;
+}
+
+.results::-webkit-scrollbar {
+  width: 7px;
+}
+.results::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 3px;
 }
 
 </style>

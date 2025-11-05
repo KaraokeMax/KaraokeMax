@@ -51,8 +51,8 @@ app.use(pontuacaoRoutes);
     console.log('Conexão com o banco OK.');
 
     // 2) Sincroniza SEM alter/force (não altera schema existente)
-    await sequelize.sync();
-    console.log('Banco de dados sincronizado (sem alter).');
+    await sequelize.sync({alter: false});
+    console.log('Banco de dados sincronizado');
 
     // 3) Sobe servidor
     const server = app.listen(port, () => {

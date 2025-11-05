@@ -1,6 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../sequelize');
-const StatusMusica = require('../Helpers/Musica-Helper');
+const MusicaHelper = require('../Helpers/Musica-Helper');
 
 const Musica = sequelize.define('Musica', {
   	id: {
@@ -14,8 +14,7 @@ const Musica = sequelize.define('Musica', {
 	},
 	slug: {
 		type: DataTypes.STRING,
-		allowNull: false,
-		unique: true
+		allowNull: false
 	},
 	artistaId: {
 		type: DataTypes.INTEGER,
@@ -23,8 +22,8 @@ const Musica = sequelize.define('Musica', {
 	},
 	status: {
 		type: DataTypes.STRING,
-		allowNull: false,
-		defaultValue: StatusMusica.CARREGANDO
+		allowNull: true,
+		defaultValue: MusicaHelper.CARREGANDO
 	},
 	usuarioCriadorId: {
 		type: DataTypes.INTEGER,
@@ -33,7 +32,7 @@ const Musica = sequelize.define('Musica', {
 	}
 }, 	{
 	tableName: 'Musicas',
-	timestamps: false
+	timestamps: true
 });
 
 module.exports = Musica;
