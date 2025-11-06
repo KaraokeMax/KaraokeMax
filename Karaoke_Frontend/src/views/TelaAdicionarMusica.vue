@@ -228,7 +228,7 @@ export default {
     flex: 1 1 auto;
     overflow: auto;
     margin: 20px 10px;
-	  padding-right: 10px;
+	padding-right: 10px;
 }
 
 .search-box {
@@ -317,7 +317,7 @@ button:disabled {
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.4);
 }
 
 .upload-button:hover {

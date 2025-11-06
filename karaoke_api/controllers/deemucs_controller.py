@@ -1,5 +1,6 @@
 import os
 import torchaudio
+import ffmpeg 
 from demucs import pretrained
 from demucs.apply import apply_model
 import torch
@@ -11,6 +12,8 @@ def separar_voz(audio_path, output_dir="temp"):
     """
 
     os.makedirs(output_dir, exist_ok=True)
+
+    print(audio_path)
 
     # === Carregar o áudio ===
     wav, sr = torchaudio.load(audio_path)

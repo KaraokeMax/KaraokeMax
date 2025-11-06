@@ -34,8 +34,8 @@ def cleanup_temp_folder():
     except Exception as e:
         print(f"[TEMP CLEANUP ERROR] {str(e)}")
 
-def process_request(audio_file, lrc_file, artista_nome, musica_nome):
-    id_job, audio_path, lrc_path = save_temp_files(audio_file, lrc_file)
+def process_request(audio_path, lrc_path, artista_nome, musica_nome, id_job):
+    # id_job, audio_path, lrc_path = save_temp_files(audio_file, lrc_file)
     
     voz_path, instrumental_path, lrc_final_path, json_path = process_audio_and_lrc(audio_path, lrc_path)
 
