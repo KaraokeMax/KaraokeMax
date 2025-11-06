@@ -8,9 +8,14 @@ const api = axios.create({
 // Interceptor para adicionar token automaticamente
 api.interceptors.request.use(
 	(config) => {
+		if (localStorage.getItem('token_expiry') > Date.now()) {
+			localStorage.removeItem('token');
+			localStorage.removeItem('token_expiry');
+			window.location.href = '/';
+		}
 		const token = localStorage.getItem('token');
 		if (token) {
-		config.headers.Authorization = `Bearer ${token}`;
+			config.headers.Authorization = `Bearer ${token}`;
 		}
 		return config;
 	},
@@ -26,8 +31,9 @@ api.interceptors.response.use(
 	},
 	(error) => {
 		if (error.response?.status === 401) {
-		localStorage.removeItem('token');
-		window.location.href = '/';
+			localStorage.removeItem('token');
+			localStorage.removeItem('token_expiry');
+			window.location.href = '/';
 		}
 		return Promise.reject(error);
 	}
