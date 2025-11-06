@@ -30,9 +30,10 @@
                         <div class="notification-title">Notificações</div>
                         <ul class="notification-list">
                             <li v-for="(n, idx) in notificacoes" :key="idx" class="notification-item">
-                                <p v-if="n.sucesso"><strong>Sucesso!</strong></p>
-                                <p v-else><strong>Erro!</strong></p>
-                                {{ n.mensagem }}
+                                <p class="notif-title">
+                                    {{ n.sucesso ? 'Sucesso!' : 'Erro!' }}
+                                </p>
+                                <p class="notif-msg">{{ n.mensagem }}</p>
                             </li>
                             <li v-if="!notificacoes.length" class="notification-item empty">Nenhuma notificação</li>
                         </ul>
@@ -163,7 +164,7 @@ export default {
             if (dropdown && !dropdown.contains(event.target)) {
                 this.dropdownOpen = false;
                 this.notificacoes.forEach((n) => {
-                    api.put(`/notificacoes/${n.id}/lida`).catch((error) => {
+                    api.patch(`/notificacoes/${n.id}/lida`).catch((error) => {
                         console.error('Erro ao marcar notificação como lida:', error);
                     });
                 });
@@ -175,6 +176,10 @@ export default {
             try {
                 const response = await api.get('/usuarios/me');
                 this.usuario = response.data;
+                console.log('Informações do usuário:', this.usuario);
+                response.data.notificacoes.forEach(notificacao => {
+                    this.notificacoes.push(notificacao);    
+                });
             } catch (error) {
                 console.error('Erro ao buscar informações do usuário:', error);
             }
@@ -240,29 +245,41 @@ export default {
     gap: 10px;
 }
 .notification-item {
-    background: #edeff5;
-    border-radius: 8px;
-    padding: 6px 12px;
-    font-size: 0.98rem;
-    box-shadow: 0 2px 8px rgba(44,62,80,0.08);
-    color: #373f7c;
-    display: flex;
-    align-items: center;
+  background: #edeff5;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.98rem;
+  box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+  color: #373f7c;
+
+  /* Empilhar título acima do conteúdo */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
 }
+
+.notif-title {
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.notif-msg {
+  margin: 0;
+  line-height: 1.35;
+  word-break: break-word; /* evita overflow em textos longos */
+}
+
+/* Deixe só UMA regra para o estado vazio */
 .notification-item.empty {
-    background: none;
-    color: #808080;
-    font-style: italic;
-    box-shadow: none;
-    justify-content: center;
+  background: none;
+  color: #808080;
+  font-style: italic;
+  box-shadow: none;
+  justify-content: center;
 }
-.notification-item.empty {
-    background: none;
-    color: #eee;
-    font-style: italic;
-    box-shadow: none;
-    justify-content: center;
-}
+
 .main-menu-layout {
     width: 100vw;
     height: 100vh;

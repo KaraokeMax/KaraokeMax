@@ -13,6 +13,7 @@ const usuarioRoutes   = require('./Routes/Usuario-Routes');
 const artistaRoutes   = require('./Routes/Artista-Routes');
 const musicaRoutes    = require('./Routes/Musica-Routes');
 const pontuacaoRoutes = require('./Routes/Pontuacao-Routes');
+const notificacaoRoutes = require('./Routes/Notificacoes-Route');
 
 const app  = express();
 const port = process.env.PORT || 3000;
@@ -42,6 +43,7 @@ app.use(usuarioRoutes);
 app.use(artistaRoutes);
 app.use(musicaRoutes);
 app.use(pontuacaoRoutes);
+app.use(notificacaoRoutes);
 
 /* ---------- Boot ---------- */
 (async () => {

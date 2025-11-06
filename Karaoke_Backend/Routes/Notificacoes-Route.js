@@ -13,3 +13,5 @@ router.patch("/notificacoes/:id/lida", async (req, res) => {
         res.status(500).json({ error: 'Erro ao marcar notificação como lida' });
     }
 });
+
+module.exports = router;
