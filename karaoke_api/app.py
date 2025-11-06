@@ -4,6 +4,7 @@ from controllers.process_controller import process_request
 from controllers.deemucs_controller import get_demucs
 from concurrent.futures import ThreadPoolExecutor
 import uuid, traceback
+import threading
 
 app = Flask(__name__)
 
@@ -12,6 +13,16 @@ JOBS = {}  # {job_id: {"status": "...", "result": {...}, "error": "..."}}
 
 TEMP_FOLDER = "temp"
 os.makedirs(TEMP_FOLDER, exist_ok=True)
+
+def _warmup_async():
+    try:
+        get_demucs()
+        print("[WARMUP] Demucs carregado (async)")
+    except Exception as e:
+        print(f"[WARMUP] Falhou: {e}")
+
+# Dispara o warmup em background na importação do app (não bloqueia /process)
+threading.Thread(target=_warmup_async, daemon=True).start()
 
 @app.route("/process", methods=["POST"])
 def process_audio():
