@@ -34,6 +34,14 @@ app.use(cors({
   credentials: true
 }));
 
+//cria pasta uploads se nao existir
+const fs = require('fs');
+const uploadDir = 'uploads/';
+
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
+
 /* ---------- Middlewares ---------- */
 app.use(express.json());
 

@@ -17,7 +17,6 @@ async function criarMusica(nome, nomeArtista, audioFile, lrc) {
 
 	const slug = toSlug(nome);
 	let musica = await Musica.create({ nome, artistaId: artista.id, slug });
-	console.log(StatusMusica.ERRO);
 	
 	let lrcFile = criarArquivoLRC(lrc);
 	mp3Path = path.resolve(audioFile.path);

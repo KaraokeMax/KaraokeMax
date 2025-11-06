@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, send_file
 import os
 from controllers.process_controller import process_request
 import uuid
+from controllers.deemucs_controller import get_demucs
 
 app = Flask(__name__)
 
@@ -42,6 +43,9 @@ def process_audio():
         "success": True
     }), 200
 
+@app.before_first_request
+def warmup():
+    get_demucs() 
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=True)

@@ -8,12 +8,6 @@ const api = axios.create({
 // Interceptor para adicionar token automaticamente
 api.interceptors.request.use(
 	(config) => {
-		const token_expiry = localStorage.getItem('token_expiry');
-		if (token_expiry < Date.now()) {
-			localStorage.removeItem('token');
-			localStorage.removeItem('token_expiry');
-			window.location.href = '/';
-		}
 		const token = localStorage.getItem('token');
 		if (token) {
 			config.headers.Authorization = `Bearer ${token}`;

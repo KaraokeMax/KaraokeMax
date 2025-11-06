@@ -4,6 +4,19 @@ from demucs import pretrained
 from demucs.apply import apply_model
 import torch
 
+# Opcional: reduzir contenda de CPU em instâncias pequenas
+torch.set_num_threads(max(1, int(os.environ.get("TORCH_NUM_THREADS", "1"))))
+
+_DEMUCS_MODEL = None
+
+def get_demucs():
+    global _DEMUCS_MODEL
+    if _DEMUCS_MODEL is None:
+        _DEMUCS_MODEL = pretrained.get_model('htdemucs')
+        _DEMUCS_MODEL.eval()
+    return _DEMUCS_MODEL
+
+
 def separar_voz(audio_path, output_dir="temp"):
     """
     Recebe o caminho do áudio MP3/WAV e separa a voz usando Demucs.
@@ -23,7 +36,7 @@ def separar_voz(audio_path, output_dir="temp"):
 
     # === Carregar o modelo Demucs ===
     print("Carregando modelo Demucs (htdemucs)...")
-    model = pretrained.get_model('htdemucs')
+    model = get_demucs()
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model.to(device)
 
