@@ -1,22 +1,24 @@
 <template>
-	<div class="musicas-container">
-		<h1 class="musicas-title">Músicas cadastradas</h1>
-		<div class="search-bar">
-			<input v-model="search" @input="filtrarMusicas" type="text" placeholder="Pesquisar por nome ou artista..."
-				class="search-input" />
-		</div>
-		<div v-if="loading" class="loading">Carregando músicas...</div>
-		<div v-else>
-			<div v-if="musicasFiltradas.length === 0" class="no-results">Nenhuma música encontrada.</div>
-			<ul class="musicas-list">
-				<li v-for="musica in musicasFiltradas" :key="musica.id" class="musica-item">
-					<div class="musica-info">
-						<span class="musica-nome">{{ musica.nome }}</span>
-						<span class="musica-artista">{{ musica.artista?.nome || 'Artista desconhecido' }}</span>
-					</div>
-					<button class="selecionar-btn" @click="selecionarMusica(musica)">Selecionar</button>
-				</li>
-			</ul>
+	<div class="container">
+		<div class="musicas-container">
+			<h1 class="musicas-title">Músicas cadastradas</h1>
+			<div class="search-bar">
+				<input v-model="search" @input="filtrarMusicas" type="text" placeholder="Pesquisar por nome ou artista..."
+					class="search-input" />
+			</div>
+			<div v-if="loading" class="loading">Carregando músicas...</div>
+			<div v-else>
+				<div v-if="musicasFiltradas.length === 0" class="no-results">Nenhuma música encontrada.</div>
+				<ul class="musicas-list">
+					<li v-for="musica in musicasFiltradas" :key="musica.id" class="musica-item">
+						<div class="musica-info">
+							<span class="musica-nome">{{ musica.nome }}</span>
+							<span class="musica-artista">{{ musica.artista?.nome || 'Artista desconhecido' }}</span>
+						</div>
+						<button class="selecionar-btn" @click="selecionarMusica(musica)">Selecionar</button>
+					</li>
+				</ul>
+			</div>
 		</div>
 	</div>
 </template>
@@ -92,48 +94,48 @@ export default {
 </script>
 
 <style scoped>
+
+.container {
+    width: 100%;
+    max-width: none;
+    height: 100vh;
+    box-sizing: border-box;
+    padding: 30px;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+}
+
 .selecionar-btn {
-	margin-left: 1.5rem;
-	padding: 0.5rem 1.2rem;
-	background: linear-gradient(90deg, #764ba2 0%, #667eea 100%);
-	color: #fff;
-	border: none;
-	border-radius: 8px;
-	font-size: 1rem;
-	font-weight: 600;
-	cursor: pointer;
-	box-shadow: 0 2px 8px rgba(102, 126, 234, 0.10);
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    background: linear-gradient(135deg, #2d3260 0%, #3a225a 100%);
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s;
 }
 
 .selecionar-btn:hover {
-	background: linear-gradient(90deg, #6b47a1 0%, #5a67d8 100%);
-	transform: translateY(-2px);
-}
-
-body {
-	width: 100vw;
-	min-height: 100vh;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	background: #f7fafc;
+	background: #0099ff;
 }
 
 .musicas-container {
-	width: 75%;
-	margin: 2rem auto;
-	background: #fff;
-	border-radius: 18px;
-	box-shadow: 0 8px 32px rgba(102, 126, 234, 0.12);
-	padding: 2rem 2rem 1.5rem 2rem;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
+    width: 90%;
+    max-width: 1100px;
+    height: 100%;
+    padding: 30px;
+    border-radius: 8px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* centraliza conteúdo horizontalmente */
+    margin: auto;
 }
 
 .musicas-title {
 	font-size: 2rem;
-	color: #764ba2;
+	color: white;
 	margin-bottom: 1.2rem;
 	text-align: center;
 }
@@ -174,17 +176,13 @@ body {
 }
 
 .musica-item {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	width: 100%;
-	padding: 1rem 1.5rem;
-	margin-bottom: 1rem;
-	background: #f7f6fd;
-	border: 1.5px solid #e2e8f0;
-	border-radius: 12px;
-	box-shadow: 0 2px 8px rgba(102, 126, 234, 0.06);
-	transition: box-shadow 0.2s, border-color 0.2s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: rgba(0,0,0,0.08);
+    margin: 12px 4px;
+    border-radius: 6px;
 }
 
 .musica-item:hover {
@@ -201,12 +199,12 @@ body {
 
 .musica-nome {
 	font-weight: 600;
-	color: #2d3748;
+	color: white;
 }
 
 .musica-artista {
 	font-size: 0.98rem;
-	color: #718096;
+    color: #bdc3c7;
 }
 
 .no-results {

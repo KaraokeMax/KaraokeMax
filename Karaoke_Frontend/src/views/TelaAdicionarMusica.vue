@@ -18,7 +18,7 @@
 
             <div v-if="songs.length > 0" class="results">
                 <div v-for="song in songs" :key="song.id" :class="!lrcSelecionada? 'song-item' : 'song-item-selecionado'">
-					<div class="song-info">
+					  <div class="song-info">
                         <h3>{{ song.title }}</h3>
                         <p>
                           {{ song.artist }}
