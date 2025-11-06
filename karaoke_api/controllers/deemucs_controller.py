@@ -4,7 +4,7 @@ from demucs import pretrained
 from demucs.apply import apply_model
 import torch
 
-# Opcional: reduzir contenda de CPU em instâncias pequenas
+# reduzir contenda de CPU em instâncias pequenas
 torch.set_num_threads(max(1, int(os.environ.get("TORCH_NUM_THREADS", "1"))))
 
 _DEMUCS_MODEL = None
@@ -16,45 +16,37 @@ def get_demucs():
         _DEMUCS_MODEL.eval()
     return _DEMUCS_MODEL
 
-
 def separar_voz(audio_path, output_dir="temp"):
     """
-    Recebe o caminho do áudio MP3/WAV e separa a voz usando Demucs.
-    Retorna o caminho do arquivo de voz isolada.
+    Separa voz e instrumental com Demucs.
+    Retorna (voz_path, inst_path).
     """
-
     os.makedirs(output_dir, exist_ok=True)
-
     print(audio_path)
 
-    # === Carregar o áudio ===
+    # carrega áudio
     wav, sr = torchaudio.load(audio_path)
-
-    # Garantir estéreo (2 canais)
+    # garante no máximo 2 canais
     if wav.shape[0] > 2:
         wav = wav[:2]
 
-    # === Carregar o modelo Demucs ===
+    # modelo + device
     print("Carregando modelo Demucs (htdemucs)...")
     model = get_demucs()
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model.to(device)
 
-    # === Separar fontes ===
     print("Separando voz e instrumental (pode demorar um pouco)...")
-    sources = apply_model(model, wav[None], device=device)[0]
+    with torch.no_grad():
+        sources = apply_model(model, wav[None], device=device)[0]
 
-    # === Nome base do arquivo ===
     base_name = os.path.splitext(os.path.basename(audio_path))[0]
-
-    # === Salvar resultados ===
     voz_path = os.path.join(output_dir, f"{base_name}_Voz.wav")
     inst_path = os.path.join(output_dir, f"{base_name}_Instrumental.wav")
 
-    # sources[3] = voz; sources[0:3] = instrumental
+    # sources[3] = vocals; others = drums, bass, other
     torchaudio.save(voz_path, sources[3], sr)
     torchaudio.save(inst_path, sources[0] + sources[1] + sources[2], sr)
 
     print("Separação concluída!")
-
-    return voz_path
+    return voz_path, inst_path

@@ -1,19 +1,18 @@
 from flask import Flask, request, jsonify, send_file
 import os
 from controllers.process_controller import process_request
-import uuid
 from controllers.deemucs_controller import get_demucs
+from concurrent.futures import ThreadPoolExecutor
+import uuid, traceback
 
 app = Flask(__name__)
+
+executor = ThreadPoolExecutor(max_workers=2)
+JOBS = {}  # {job_id: {"status": "...", "result": {...}, "error": "..."}}
 
 TEMP_FOLDER = "temp"
 os.makedirs(TEMP_FOLDER, exist_ok=True)
 
-@app.route("/")
-def index():
-    return send_file(os.path.join(os.path.dirname(__file__), "tests", "static", "index.html"))
-
-# Nova rota que recebe nome da música e artista, e salva arquivos no B2
 @app.route("/process", methods=["POST"])
 def process_audio():
     print("[REQUEST RECEIVED] Processing audio and LRC files...")
@@ -23,29 +22,45 @@ def process_audio():
 
     id_job = str(uuid.uuid4())[:8]
     audio_file = request.files["audio"]
-    path_audio = os.path.join(TEMP_FOLDER, id_job + ".mp3")
-    audio_file.save(path_audio)
     lrc_file = request.files["lrc"]
-    path_lrc = os.path.join(TEMP_FOLDER, id_job + ".lrc")
-    lrc_file.save(path_lrc)
     musica_nome = request.form.get("musica")
     artista_nome = request.form.get("artista")
+
+    audio_path = os.path.join(TEMP_FOLDER, f"{id_job}.mp3")
+    lrc_path = os.path.join(TEMP_FOLDER, f"{id_job}.lrc")
+    audio_file.save(audio_path)
+    lrc_file.save(lrc_path)
+
+    JOBS[id_job] = {"status": "queued"}
+
+    def _run():
+        try:
+            JOBS[id_job]["status"] = "running"
+            process_request(audio_path, lrc_path, artista_nome, musica_nome, id_job)
+            JOBS[id_job]["status"] = "done"
+            JOBS[id_job]["result"] = {"message": "Arquivos processados e enviados ao B2.", "id_job": id_job}
+        except Exception as e:
+            JOBS[id_job]["status"] = "error"
+            JOBS[id_job]["error"] = f"{e}\n{traceback.format_exc()}"
     
-    # Processa áudio e LRC
-    try:
-        process_request(path_audio, path_lrc, artista_nome, musica_nome, id_job)
-    except Exception as e:
-        print(f"[PROCESS ERROR] {str(e)}")
-        return jsonify({"error": str(e)}), 500
+    executor.submit(_run)
+    return jsonify({"job_id": id_job}), 202
 
-    # Retorna info dos arquivos enviados
-    return jsonify({
-        "success": True
-    }), 200
+@app.route("/status/<job_id>", methods=["GET"])
+def job_status(job_id):
+    info = JOBS.get(job_id)
+    if not info:
+        return jsonify({"error": "job not found"}), 404
+    return jsonify(info), 200
 
-@app.before_first_request
-def warmup():
-    get_demucs() 
+@app.route("/")
+def index():
+    return send_file(os.path.join(os.path.dirname(__file__), "tests", "static", "index.html"))
+
+# app.py (adicione isso)
+@app.route("/health")
+def health():
+    return jsonify({"ok": True}), 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=True)

@@ -15,9 +15,7 @@ def save_temp_files(audio_file, lrc_file):
     return id_job, audio_path, lrc_path
 
 def process_audio_and_lrc(audio_path, lrc_path):
-    voz_path = separar_voz(audio_path)
-    base_name = os.path.splitext(os.path.basename(audio_path))[0]
-    instrumental_path = os.path.join(TEMP_FOLDER, f"{base_name}_Instrumental.wav")
+    voz_path, instrumental_path = separar_voz(audio_path)
     lrc_final_path = processar_lrc_com_pitch(lrc_path, voz_path, output_dir=TEMP_FOLDER)
     json_path = gerar_json_notas(lrc_path, voz_path, output_dir=TEMP_FOLDER)
     return voz_path, instrumental_path, lrc_final_path, json_path
@@ -35,12 +33,8 @@ def cleanup_temp_folder():
         print(f"[TEMP CLEANUP ERROR] {str(e)}")
 
 def process_request(audio_path, lrc_path, artista_nome, musica_nome, id_job):
-    # id_job, audio_path, lrc_path = save_temp_files(audio_file, lrc_file)
-    
     voz_path, instrumental_path, lrc_final_path, json_path = process_audio_and_lrc(audio_path, lrc_path)
-
     upload_to_b2(voz_path, instrumental_path, lrc_final_path, json_path, artista_nome, musica_nome, id_job)
-
     print("[PROCESS] Antes de cleanup_temp_folder")
     cleanup_temp_folder()
     print("[PROCESS] Depois de cleanup_temp_folder")
