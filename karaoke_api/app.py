@@ -5,6 +5,7 @@ from controllers.deemucs_controller import get_demucs
 from concurrent.futures import ThreadPoolExecutor
 import uuid, traceback
 import threading
+from services.api_service import atualizar_status_musica
 
 app = Flask(__name__)
 
@@ -28,7 +29,7 @@ threading.Thread(target=_warmup_async, daemon=True).start()
 def process_audio():
     print("[REQUEST RECEIVED] Processing audio and LRC files...")
 
-    if "audio" not in request.files or "lrc" not in request.files or "musica" not in request.form or "artista" not in request.form:
+    if "audio" not in request.files or "lrc" not in request.files or "musica" not in request.form or "artista" not in request.form or "id_musica" not in request.form:
         return jsonify({"error": "Estão faltando arquivos ou informações"}), 400
 
     id_job = str(uuid.uuid4())[:8]
@@ -36,6 +37,7 @@ def process_audio():
     lrc_file = request.files["lrc"]
     musica_nome = request.form.get("musica")
     artista_nome = request.form.get("artista")
+    id_musica = request.form.get("id_musica")
 
     audio_path = os.path.join(TEMP_FOLDER, f"{id_job}.mp3")
     lrc_path = os.path.join(TEMP_FOLDER, f"{id_job}.lrc")
@@ -47,12 +49,14 @@ def process_audio():
     def _run():
         try:
             JOBS[id_job]["status"] = "running"
-            process_request(audio_path, lrc_path, artista_nome, musica_nome, id_job)
+            process_request(audio_path, lrc_path, artista_nome, musica_nome, id_job, id_musica)
             JOBS[id_job]["status"] = "done"
             JOBS[id_job]["result"] = {"message": "Arquivos processados e enviados ao B2.", "id_job": id_job}
+            atualizar_status_musica(id_musica, "PRONTA")
         except Exception as e:
             JOBS[id_job]["status"] = "error"
             JOBS[id_job]["error"] = f"{e}\n{traceback.format_exc()}"
+            atualizar_status_musica(id_musica, "ERRO", str(e))
     
     executor.submit(_run)
     return jsonify({"job_id": id_job}), 202

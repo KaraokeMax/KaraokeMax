@@ -17,3 +17,5 @@ gunicorn
 #adicionar IA para detecção de nota
 crepe
 tensorflow-cpu==2.13.0  
+
+requests

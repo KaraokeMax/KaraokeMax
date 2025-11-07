@@ -11,46 +11,47 @@ const FormData = require('form-data');
 const path = require('path');
 const fs = require('fs');
 
-async function criarMusica(nome, nomeArtista, audioFile, lrc) {
+async function criarMusica(nome, nomeArtista, audioFile, lrc, idUser) {
+	console.log(`Iniciando criação da música "${nome}" do artista "${nomeArtista}"...`);
 	const artista = await artistaService.criarArtista(nomeArtista);
 	if (!artista) throw new Error('Erro ao criar artista.');
 
 	const slug = toSlug(nome);
-	let musica = await Musica.create({ nome, artistaId: artista.id, slug });
-	
-	let lrcFile = criarArquivoLRC(lrc);
-	mp3Path = path.resolve(audioFile.path);
-
+	let musica = await Musica.create({ nome, artistaId: artista.id, slug, usuarioCriadorId: idUser });
+	let mp3Path = null;
+		
 	try {
+
+		let lrcFile = criarArquivoLRC(lrc);
+		mp3Path = path.resolve(audioFile.path);
 
 		const formData = new FormData();
 		formData.append("audio", fs.createReadStream(mp3Path), {filename: audioFile.originalname, contentType: audioFile.mimetype});
 		formData.append("lrc", lrcFile.conteudo, {filename: lrcFile.nome, contentType: lrcFile.tipo});
 		formData.append("musica", musica.slug);
 		formData.append("artista", artista.slug);
+		formData.append("id_musica", musica.id);
 
 		console.log(`Enviando música "${musica.nome}" para processamento no servidor Python...`);
 		const pythonResponse = await axios.post(`${urlPythonServer}/process`, formData, {
-			headers: formData.getHeaders(), 
+			headers: formData.getHeaders(),  
 			maxBodyLength: Infinity
 		});
 
-		if (pythonResponse.status !== 200) {
+		if (pythonResponse.status !== 202) {
 			throw new Error(`Erro no processamento da música. Status: ${pythonResponse.status}`);
 		}
-		await alteraStatusMusica(musica.id, StatusMusica.PRONTA);
-		await notificacaoService.criarNotificacao(artista.id, musica.id, `Música "${musica.nome}" processada com sucesso.`, true);
-		console.log(`Música "${musica.nome}" processada com sucesso.`);
+		console.log("Música enviada para processamento com sucesso.");		
 	}
 	catch (err) {
-		console.error('Erro ao processar música no servidor Python:', err);
-		await alteraStatusMusica(musica.id, StatusMusica.ERRO);
+		console.error('Erro ao criar/processar música:', err);
+		notificacaoService.criarNotificacao(idUser, musica.id, `Erro ao criar/processar a música "${nome}".`, false, err.message);
 		throw err;
 	}
 	finally {
 		// Limpeza de arquivos temporários
-		fs.unlinkSync(mp3Path);
-	}
+		fs.unlinkSync(mp3Path);	
+	}	
 }
 
 async function buscarTodasMusicas() {
@@ -66,12 +67,19 @@ async function deletarMusica(id) {
 	return await Musica.destroy({ where: { id } });
 }
 
-async function alteraStatusMusica(id, status) {
+async function alteraStatusMusica(id, status, erro = null) {
 	if (!Object.values(StatusMusica).includes(status)) {
 		throw new Error('Status inválido');
 	}
 
-	await Musica.update({ status: status }, { where: { id: id } });
+	let musica = await Musica.update({ status: status }, { where: { id: id } });
+
+	if (status === StatusMusica.ERRO) {
+		await notificacaoService.criarNotificacao(musica.usuarioCriadorId, musica.id, `Houve um erro ao processar a música "${musica.nome}". Erro: ${erro}`, false);
+	}
+	else {
+		await notificacaoService.criarNotificacao(musica.usuarioCriadorId, musica.id, `Processamento da música "${musica.nome}" finalizado com sucesso.`, true);
+	}
 }
 
 async function buscarMusicaComArtista(id) {
@@ -101,6 +109,7 @@ module.exports = {
 	buscarTodasMusicas,
 	deletarMusica,
 	verificarMusicaExiste,
-	buscarMusicaComArtista
+	buscarMusicaComArtista,
+	alteraStatusMusica
 };
 

@@ -5,7 +5,6 @@ const router = express.Router();
 const musicaService = require('../Services/Musica-Service');
 const auth = require('../middleware/auth');
 const multer = require('multer');
-const notificacaoService = require('../Services/Notificacao-Service');
 const fs = require('fs');
 
 const storage = multer.diskStorage({
@@ -28,12 +27,8 @@ router.post('/musicas', auth, upload.fields([{ name: 'audio' }]), (req, res) => 
 	res.status(202).json({ message: 'Processamento da música iniciado.' });
 
 	setImmediate(async () => {
-		try {
-			await musicaService.criarMusica(nomeMusica, nomeArtista, audioFile, lrc);
-		} catch (err) {
-			console.error('Erro ao criar/processar música (assíncrono):', err);
-			await notificacaoService.criarNotificacao(req.usuario.id, null, `Erro ao criar/processar a música "${nomeMusica}".`, false, err.message);
-		}
+		await musicaService.criarMusica(nomeMusica, nomeArtista, audioFile, lrc, req.usuario.id);
+		fs.unlinkSync(audioFile.path); // Limpeza do arquivo de áudio enviado
 	});
 });
 
@@ -114,6 +109,21 @@ router.get('/musicas/:nomeMusica', async (req, res) => {
 		res.json({ musicaExiste: existe });
 	} catch (err) {
 		console.error('Erro ao verificar existência da música:', err);
+		res.status(500).json({ error: err.message || 'Erro interno no servidor' });
+	}
+});
+
+router.patch('/musicas/:id/status', async (req, res) => {
+	const { id } = req.params;
+	const { status } = req.body;
+	const { erro } = req.body;
+	try {
+		if (!status || !id) return res.status(400).json({ error: 'Faltando informações para alterar status.' });
+		
+		await musicaService.alteraStatusMusica(id, status, erro);
+		res.json({ message: 'Status da música alterado com sucesso!' });
+	} catch (err) {
+		console.error('Erro ao alterar status da música:', err);
 		res.status(500).json({ error: err.message || 'Erro interno no servidor' });
 	}
 });

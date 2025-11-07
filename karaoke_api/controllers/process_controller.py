@@ -32,10 +32,8 @@ def cleanup_temp_folder():
     except Exception as e:
         print(f"[TEMP CLEANUP ERROR] {str(e)}")
 
-def process_request(audio_path, lrc_path, artista_nome, musica_nome, id_job):
+def process_request(audio_path, lrc_path, artista_nome, musica_nome, id_job, id_musica):
     voz_path, instrumental_path, lrc_final_path, json_path = process_audio_and_lrc(audio_path, lrc_path)
     upload_to_b2(voz_path, instrumental_path, lrc_final_path, json_path, artista_nome, musica_nome, id_job)
-    print("[PROCESS] Antes de cleanup_temp_folder")
+    print("[PROCESS] Limpando arquivos temporários...")
     cleanup_temp_folder()
-    print("[PROCESS] Depois de cleanup_temp_folder")
-    print("[PROCESS] Antes do return da resposta")
