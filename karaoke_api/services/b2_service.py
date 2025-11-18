@@ -79,7 +79,7 @@ class B2Uploader:
                 start_time = time.time()
                 if file_size > 100 * 1024 * 1024:  # >100MB usa multipart
                     print(f"[B2 UPLOAD] Usando upload_large_file para {remote_name}")
-                    uploaded = self._bucket.upload_large_file(
+                    uploaded = self._bucket.upload(
                         UploadSourceLocalFile(str(p)),
                         remote_name,
                         content_type=content_type,

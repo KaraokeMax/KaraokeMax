@@ -1,4 +1,5 @@
 const Musica = require('../Models/Musica-Model');
+const Artista = require('../Models/Artista-Model');
 const artistaService = require('../Services/Artista-Service');
 const StatusMusica = require('../Helpers/Musica-Helper');
 const { Op } = require('sequelize');
@@ -56,10 +57,8 @@ async function criarMusica(nome, nomeArtista, audioFile, lrc, idUser) {
 
 async function buscarTodasMusicas() {
 	return await Musica.findAll({
-		include: [{
-			model: Artista,
-			as: 'artista'
-		}]
+		where: { status: StatusMusica.PRONTA },
+		include: [{ model: Artista, as: 'artista' }]
 	});
 }
 
@@ -72,7 +71,9 @@ async function alteraStatusMusica(id, status, erro = null) {
 		throw new Error('Status inválido');
 	}
 
-	let musica = await Musica.update({ status: status }, { where: { id: id } }, { returning: true });
+	const musica = await Musica.findByPk(id);
+	musica.status = status;
+	await musica.save();
 
 	if (status === StatusMusica.ERRO) {
 		await notificacaoService.criarNotificacao(musica.usuarioCriadorId, musica.id, `Houve um erro ao processar a música "${musica.nome}". Erro: ${erro}`, false);

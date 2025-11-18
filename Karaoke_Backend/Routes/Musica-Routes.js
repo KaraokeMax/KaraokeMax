@@ -46,9 +46,7 @@ router.get('/musicas', auth, async (req, res) => {
 router.get('/musicas/arquivos/:id', auth, async (req, res) => {
   const { id } = req.params;
   try {
-    // let { musica_slug, artista_slug } = await musicaService.buscarMusicaComArtista(id);
-	let artista_slug = "grupo_menos_e_mais";
-	let musica_slug = "p_do_pecado";
+    let { musica_slug, artista_slug } = await musicaService.buscarMusicaComArtista(id);
 
     // baixa os streams do B2
     const { instrumentos, lyrics, notes } = await b2Service.getKaraokeStreams(artista_slug, musica_slug);

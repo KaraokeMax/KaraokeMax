@@ -56,6 +56,7 @@ def process_audio():
         except Exception as e:
             JOBS[id_job]["status"] = "error"
             JOBS[id_job]["error"] = f"{e}\n{traceback.format_exc()}"
+            print(f"[PROCESS ERROR] {JOBS[id_job]['error']}")
             atualizar_status_musica(id_musica, "ERRO", str(e))
     
     executor.submit(_run)

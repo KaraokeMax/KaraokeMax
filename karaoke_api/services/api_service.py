@@ -13,4 +13,3 @@ def atualizar_status_musica(id_musica, novo_status, erro = None):
         
     response = requests.patch(url, json=payload, headers=headers)
     response.raise_for_status()
-    print(response.json())

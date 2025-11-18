@@ -74,21 +74,21 @@ export default {
 		}
 	},
 	mounted() {
-		//this.carregarMusicas();
+		this.carregarMusicas();
 		// Mock para visualização se não houver dados reais
-		setTimeout(() => {
-			if (!this.musicas.length) {
-				this.musicas = [
-					{ id: 1, nome: 'Evidências', artista: { nome: 'Chitãozinho & Xororó' } },
-					{ id: 2, nome: 'Shape of You', artista: { nome: 'Ed Sheeran' } },
-					{ id: 3, nome: 'Sorry', artista: { nome: 'Justin Bieber' } },
-					{ id: 4, nome: 'Meteoro da Paixão', artista: { nome: 'Luan Santana' } },
-					{ id: 5, nome: 'Mercy', artista: { nome: 'Shawn Mendes' } }
-				];
-				this.musicasFiltradas = this.musicas;
-				this.loading = false;
-			}
-		}, 1000);
+		// setTimeout(() => {
+		// 	if (!this.musicas.length) {
+		// 		this.musicas = [
+		// 			{ id: 1, nome: 'Evidências', artista: { nome: 'Chitãozinho & Xororó' } },
+		// 			{ id: 2, nome: 'Shape of You', artista: { nome: 'Ed Sheeran' } },
+		// 			{ id: 3, nome: 'Sorry', artista: { nome: 'Justin Bieber' } },
+		// 			{ id: 4, nome: 'Meteoro da Paixão', artista: { nome: 'Luan Santana' } },
+		// 			{ id: 5, nome: 'Mercy', artista: { nome: 'Shawn Mendes' } }
+		// 		];
+		// 		this.musicasFiltradas = this.musicas;
+		// 		this.loading = false;
+		// 	}
+		// }, 1000);
 	}
 };
 </script>
