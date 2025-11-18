@@ -72,7 +72,7 @@ async function alteraStatusMusica(id, status, erro = null) {
 		throw new Error('Status inválido');
 	}
 
-	let musica = await Musica.update({ status: status }, { where: { id: id } });
+	let musica = await Musica.update({ status: status }, { where: { id: id } }, { returning: true });
 
 	if (status === StatusMusica.ERRO) {
 		await notificacaoService.criarNotificacao(musica.usuarioCriadorId, musica.id, `Houve um erro ao processar a música "${musica.nome}". Erro: ${erro}`, false);

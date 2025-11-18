@@ -1,5 +1,39 @@
 <template>
 	<div class="karaoke-wrapper">
+		<!-- Modal de Pontuação -->
+		<div v-if="showScoreModal" class="modal-overlay" @click.self="cancelarSalvamento">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2>🎉 Karaokê Finalizado!</h2>
+				</div>
+				<div class="modal-body">
+					<div class="final-score">
+						<span class="score-label">Sua Pontuação</span>
+						<span class="score-value-large">{{ pontuacaoTotal.toFixed(0) }}%</span>
+					</div>
+					<div class="public-option">
+						<label class="checkbox-container">
+							<input type="checkbox" v-model="isPontuacaoPublica" />
+							<span class="checkbox-label">
+								Tornar pontuação pública
+							</span>
+						</label>
+						<p class="public-description">
+							Sua pontuação será visível para outros usuários no ranking
+						</p>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button @click="cancelarSalvamento" class="btn-modal btn-secondary">
+						Não Salvar
+					</button>
+					<button @click="salvarPontuacao(isPontuacaoPublica)" class="btn-modal btn-primary">
+						Salvar Pontuação
+					</button>
+				</div>
+			</div>
+		</div>
+
 		<!-- Barra de título personalizada -->
 		<div class="title-bar">
 			<div class="title-bar-drag-area">
@@ -70,7 +104,7 @@
 
 				<!-- Piano-roll contínuo (rolagem horizontal com o tempo) -->
 				<div class="staff-container">
-					<canvas ref="staffCanvas" width="1200" height="200" class="staff-canvas"></canvas>
+					<canvas ref="staffCanvas" width="1200" height="150" class="staff-canvas"></canvas>
 				</div>
 
 				<!-- Indicador de Microfone -->
@@ -112,7 +146,7 @@
 						</svg>
 					</button>
 
-					<div class="progress-bar" @click="seek">
+					<div class="progress-bar">
 						<div class="progress-fill" :style="{ width: progresso + '%' }"></div>
 						<div class="progress-handle" :style="{ left: progresso + '%' }"></div>
 					</div>
@@ -193,7 +227,7 @@ function hzToNoteName(hz, a4 = 440) {
 }
 
 /* ========= Helpers de desenho (piano-roll contínuo) ========= */
-function centsToY(cents, H = 200, semitonPx = 6, refCents = 6900) {
+function centsToY(cents, H = 300, semitonPx = 10, refCents = 4800) {
 	const centerY = H / 2;
 	const semitons = (cents - refCents) / 100;
 	const y = centerY - semitons * semitonPx;
@@ -324,35 +358,17 @@ function drawRoll(ctx, W, H, {
 	ctx.lineTo(xNow, H - 10);
 	ctx.stroke();
 	ctx.setLineDash([]);
-
-	// Legenda
-	ctx.fillStyle = "#e5e7eb";
-	ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif";
-	ctx.fillText("Ref (gabarito)", margin, 18);
-	ctx.fillStyle = "#60a5fa";
-	ctx.fillRect(margin + 90, 10, 14, 4);
-	ctx.fillStyle = "#e5e7eb";
-	ctx.fillText("Usuário", margin + 120, 18);
-	ctx.fillStyle = "#f59e0b";
-	ctx.fillRect(margin + 180, 10, 14, 4);
 }
 
 /* ========= Dynamic Time Warping ========= */
 function computeDTWScore(refSequence, userSequence) {
-	console.log('🔧 computeDTWScore chamada:', {
-		refLength: refSequence?.length,
-		userLength: userSequence?.length
-	});
 
 	if (!refSequence || !userSequence || refSequence.length === 0 || userSequence.length === 0) {
-		console.log('❌ DTW: Sequências vazias ou inválidas');
 		return 0;
 	}
 
 	const n = refSequence.length;
 	const m = userSequence.length;
-	
-	console.log('📐 DTW: Criando matriz', n, 'x', m);
 	
 	// Matriz DTW simplificada - sem verificação de null pois já foi filtrado
 	const dtw = Array(n + 1).fill(null).map(() => Array(m + 1).fill(Infinity));
@@ -386,8 +402,6 @@ function computeDTWScore(refSequence, userSequence) {
 		}
 	}
 
-	console.log('✅ DTW: Células válidas processadas:', validCells);
-
 	const totalDistance = dtw[n][m];
 	
 	console.log('🔍 DTW final cell value:', totalDistance);
@@ -401,12 +415,6 @@ function computeDTWScore(refSequence, userSequence) {
 	// Isso dá a distância média por frame
 	const minLength = Math.min(n, m);
 	const avgDistancePerFrame = totalDistance / minLength;
-
-	console.log('📏 DTW:', {
-		totalDistance: totalDistance.toFixed(2),
-		minLength,
-		avgDistancePerFrame: avgDistancePerFrame.toFixed(4)
-	});
 
 	// Converter para pontuação percentual (0-100)
 	// 0 semitons = 100%
@@ -443,6 +451,7 @@ export default {
 			analyser: null,
 			microphone: null,
 			pontuacaoTotal: 0,
+			pontuacoesFrames: [],
 			isMaximized: false,
 			currentLineRef: null,
 
@@ -472,7 +481,10 @@ export default {
 			detectedNote: '-',
 
 			// controle de pontuação DTW
-			dtwUpdateInterval: null
+			dtwUpdateInterval: null,
+
+			showScoreModal: false,
+			isPontuacaoPublica: true,
 		};
 	},
 	computed: {
@@ -560,6 +572,8 @@ export default {
 
 				this.loadingMessage = 'Processando letras...';
 				this.parseLRC(lrcText);
+
+				await this.toggleMicrophone();
 
 				this.loading = false;
 				this.error = null;
@@ -661,7 +675,6 @@ export default {
 			console.log('🎵 Iniciando cálculo DTW contínuo...');
 			// Atualizar pontuação DTW a cada 500ms
 			this.dtwUpdateInterval = setInterval(() => {
-				console.log('⏱️ Tick DTW - microfone ativo:', this.microfoneAtivo, '| tocando:', this.isPlaying);
 				if (this.microfoneAtivo && this.isPlaying) {
 					console.log('✅ Calculando DTW...');
 					this.calcularPontuacaoDTW();
@@ -675,23 +688,12 @@ export default {
 			const tMs = this.tempoAtual * 1000;
 			const currentIdx = Math.round((tMs - this.refStartMs) / this.hopMs);
 
-			console.log('📊 DTW Debug:', {
-				tempoAtual: this.tempoAtual.toFixed(2) + 's',
-				tMs: tMs.toFixed(0) + 'ms',
-				currentIdx,
-				refStartMs: this.refStartMs,
-				hopMs: this.hopMs
-			});
-
 			// Pegar janela de 5 segundos de dados (500 frames com hopMs=10)
 			const windowSize = 500;
 			const startIdx = Math.max(0, currentIdx - windowSize);
 			const endIdx = Math.min(this.refCents.length, currentIdx);
 
-			console.log('🪟 Janela:', { startIdx, endIdx, tamanho: endIdx - startIdx });
-
 			if (endIdx - startIdx < 50) {
-				console.log('⚠️ Dados insuficientes para DTW (mínimo 50 frames)');
 				return;
 			}
 
@@ -711,15 +713,7 @@ export default {
 				}
 			}
 
-			console.log('📈 Sequências sincronizadas:', {
-				refSynced: refSynced.length,
-				userSynced: userSynced.length,
-				refTotal: refWindow.length,
-				userTotal: userWindow.length
-			});
-
 			if (refSynced.length < 20) {
-				console.log('⚠️ Sequências sincronizadas insuficientes (< 20 frames)');
 				return;
 			}
 
@@ -727,9 +721,10 @@ export default {
 			const novaPontuacao = computeDTWScore(refSynced, userSynced);
 			console.log('🎯 Pontuação DTW calculada:', novaPontuacao.toFixed(2) + '%');
 			
-			this.pontuacaoTotal = novaPontuacao;
+			this.pontuacoesFrames.push(novaPontuacao);
+			this.pontuacaoTotal = this.pontuacoesFrames.sum() / this.pontuacoesFrames.length;
 		},
-
+		
 		detectarPitch() {
 			if (!this.microfoneAtivo) return;
 
@@ -972,16 +967,31 @@ export default {
 			return `${min}:${sec.toString().padStart(2, '0')}`;
 		},
 
-		finalizarKaraoke() {
-			// Calcular pontuação final usando toda a sequência
-			const refValid = this.refCents.filter(c => c !== null);
-			const userValid = this.userCentsGlobal.filter(c => c !== null);
-			
-			if (refValid.length > 0 && userValid.length > 0) {
-				this.pontuacaoTotal = computeDTWScore(refValid, userValid);
+		finalizarKaraoke() {			
+			this.showScoreModal = true;
+		},
+
+		async salvarPontuacao(isPublica) {
+			try {
+				const musicaId = this.$route?.query?.id;
+				
+				await api.post('/pontuacoes', {
+					idMusica: musicaId,
+					pontos: this.pontuacaoTotal,
+					publico: isPublica
+				});
+
+				this.showScoreModal = false;
+				this.voltarParaMusicas();
+			} catch (error) {
+				console.error('Erro ao salvar pontuação:', error);
+				alert('Erro ao salvar pontuação. Tente novamente.');
 			}
-			
-			alert(`Karaokê finalizado! Pontuação: ${this.pontuacaoTotal.toFixed(0)}%`);
+		},
+
+		cancelarSalvamento() {
+			this.showScoreModal = false;
+			this.voltarParaMusicas();
 		},
 
 		voltarParaMusicas() {
@@ -1046,7 +1056,7 @@ export default {
 
 .title-bar {
 	height: 32px;
-	background: rgba(0, 0, 0, 0.1);
+	background: rgba(0, 0, 0, 0.4);
 	backdrop-filter: blur(10px);
 	display: flex;
 	align-items: center;
@@ -1413,5 +1423,196 @@ export default {
 
 .volume-slider {
 	width: 100px;
+}
+
+/* Adicione este CSS no final do <style scoped> */
+
+/* Modal de Pontuação */
+.modal-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.85);
+	backdrop-filter: blur(10px);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 2000;
+	animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+.modal-content {
+	background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+	border-radius: 24px;
+	padding: 2.5rem;
+	max-width: 500px;
+	width: 90%;
+	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+	border: 2px solid rgba(255, 255, 255, 0.1);
+	animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+	from {
+		transform: translateY(50px);
+		opacity: 0;
+	}
+	to {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+
+.modal-header {
+	text-align: center;
+	margin-bottom: 2rem;
+}
+
+.modal-header h2 {
+	font-size: 2rem;
+	font-weight: 700;
+	color: white;
+	margin: 0;
+}
+
+.modal-body {
+	margin-bottom: 2rem;
+}
+
+.final-score {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 2rem;
+	background: rgba(72, 187, 120, 0.15);
+	border-radius: 16px;
+	border: 2px solid rgba(72, 187, 120, 0.3);
+	margin-bottom: 2rem;
+}
+
+.final-score .score-label {
+	font-size: 1rem;
+	color: rgba(255, 255, 255, 0.7);
+	margin-bottom: 0.5rem;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+
+.score-value-large {
+	font-size: 4rem;
+	font-weight: 800;
+	color: #48bb78;
+	text-shadow: 0 0 30px rgba(72, 187, 120, 0.5);
+	line-height: 1;
+}
+
+.public-option {
+	padding: 1.5rem;
+	background: rgba(0, 0, 0, 0.2);
+	border-radius: 12px;
+}
+
+.checkbox-container {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	cursor: pointer;
+	user-select: none;
+}
+
+.checkbox-container input[type="checkbox"] {
+	width: 24px;
+	height: 24px;
+	cursor: pointer;
+	accent-color: #48bb78;
+	flex-shrink: 0;
+}
+
+.checkbox-label {
+	font-size: 1.1rem;
+	font-weight: 600;
+	color: white;
+}
+
+.public-description {
+	margin: 0.75rem 0 0 2.5rem;
+	font-size: 0.9rem;
+	color: rgba(255, 255, 255, 0.6);
+	line-height: 1.5;
+}
+
+.modal-footer {
+	display: flex;
+	gap: 1rem;
+	justify-content: flex-end;
+}
+
+.btn-modal {
+	padding: 0.875rem 2rem;
+	border: none;
+	border-radius: 12px;
+	font-weight: 600;
+	font-size: 1rem;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.btn-modal:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.btn-modal:active {
+	transform: translateY(0);
+}
+
+.btn-secondary {
+	background: rgba(255, 255, 255, 0.1);
+	color: rgba(255, 255, 255, 0.8);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-secondary:hover {
+	background: rgba(255, 255, 255, 0.15);
+	color: white;
+}
+
+.btn-primary {
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	color: white;
+	box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:hover {
+	box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+}
+
+.modal-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0); /* Totalmente transparente */
+	backdrop-filter: blur(); /* Blur bem forte */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 2000;
+	animation: fadeIn 0.3s ease;
 }
 </style>

@@ -5,6 +5,7 @@ import TelaMusicas from "../views/TelaMusicas.vue";
 import TelaKaraoke from "../views/TelaKaraoke.vue";
 import TelaDefinirSenha from "../views/TelaDefinirSenha.vue";
 import TelaAdicionarMusica from "../views/TelaAdicionarMusica.vue";
+import TelaPontuacoes from "../views/TelaPontuacoes.vue";
 
 const routes = [
 	{
@@ -39,6 +40,12 @@ const routes = [
 		path: "/adicionarMusica",
 		name: "AdicionarMusica",
 		component: TelaAdicionarMusica,
+		meta: { requiresAuth: true }
+	},
+	{
+		path: "/telaPontuacoes",
+		name: "TelaPontuacoes",
+		component: TelaPontuacoes,
 		meta: { requiresAuth: true }
 	}
 ];

@@ -81,6 +81,7 @@ def gerar_json_notas(lrc_path, wav_path, output_dir="temp", confidence_threshold
       ]
     }
     """
+    print("🎵 Gerando JSON de notas com CREPE...")
     os.makedirs(output_dir, exist_ok=True)
     base_name = os.path.splitext(os.path.basename(lrc_path))[0]
 

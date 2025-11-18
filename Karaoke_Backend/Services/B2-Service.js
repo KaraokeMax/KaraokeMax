@@ -64,7 +64,7 @@ async function getKaraokeStreams(artista_slug, musica_slug) {
     throw err;
   }
 
-  // lyrics.lrc
+  // notes.lrc
   let notesRes;
   try {
     notesRes = await b2.downloadFileByName({
@@ -76,7 +76,7 @@ async function getKaraokeStreams(artista_slug, musica_slug) {
     const status = e?.response?.status || 500;
     const msg = status === 404
       ? `lyrics.lrc não encontrado em ${basePath}`
-      : `Falha ao baixar lyrics.lrc: ${e.message || e}`;
+      : `Falha ao baixar notes.json: ${e.message || e}`;
     const err = new Error(msg);
     err.status = status;
     throw err;

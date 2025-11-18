@@ -28,7 +28,6 @@ router.post('/musicas', auth, upload.fields([{ name: 'audio' }]), (req, res) => 
 
 	setImmediate(async () => {
 		await musicaService.criarMusica(nomeMusica, nomeArtista, audioFile, lrc, req.usuario.id);
-		fs.unlinkSync(audioFile.path); // Limpeza do arquivo de áudio enviado
 	});
 });
 
@@ -113,6 +112,7 @@ router.get('/musicas/:nomeMusica', async (req, res) => {
 	}
 });
 
+// Alterar status da música
 router.patch('/musicas/:id/status', async (req, res) => {
 	const { id } = req.params;
 	const { status } = req.body;

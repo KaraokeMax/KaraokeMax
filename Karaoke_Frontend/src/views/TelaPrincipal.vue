@@ -63,7 +63,7 @@
                         <span>Escolher música</span>
                     </button>
                     <button class="sidebar-btn" @click="irParaAdicionarMusica">
-                        <span class="icon">➕</span>
+                        <span class="icon">+</span>
                         <span>Adicionar música</span>
                     </button>
                     <button class="sidebar-btn" @click="irParaPontuacoes">
@@ -74,6 +74,7 @@
             </aside>
             <TelaMusicas v-if="telaAtual === 'EscolherMusica'" :key="telaAtual" />
             <TelaAdicionarMusica v-else-if="telaAtual === 'AdicionarMusica'" />
+            <TelaPontuacoes v-else-if="telaAtual === 'Pontuacoes'" />
             <section v-else class="menu-welcome">
                 <div class="welcome-content">
                     <h1>Bem-vindo ao KaraokeMax!</h1>
@@ -95,12 +96,14 @@
 import api from '../services/api';
 import TelaMusicas from './TelaMusicas.vue';
 import TelaAdicionarMusica from './TelaAdicionarMusica.vue';
+import TelaPontuacoes from './TelaPontuacoes.vue';
 
 export default {
     name: 'TelaPrincipal',
     components: {
         TelaMusicas,
-        TelaAdicionarMusica
+        TelaAdicionarMusica,
+        TelaPontuacoes
     },
     name: 'TelaPrincipal',
     data() {
@@ -124,7 +127,7 @@ export default {
             this.telaAtual = 'AdicionarMusica';
         },
         irParaPontuacoes() {
-            this.$router.push({ name: 'Pontuacoes' });
+            this.telaAtual = 'Pontuacoes';
         },
         irParaTelaInicial() {
             this.telaAtual = null;
@@ -297,7 +300,7 @@ export default {
 
 .title-bar {
     height: 32px;
-    background: rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(10px);
     display: flex;
     align-items: center;
@@ -365,15 +368,15 @@ export default {
 
 .sidebar {
     width: 240px;
-    background: linear-gradient(135deg, #2d3260 0%, #3a225a 100%);
-    box-shadow: 0 8px 32px 0 rgba(44,62,80,0.18);
+    background: linear-gradient(135deg, #8a65df44 0%, #4f2997 100%);
+    box-shadow: 0 8px 32px 0 rgba(24, 72, 119, 0.747);
     border-right: none;
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 32px 0 0 0;
     z-index: 10;
-    border-radius: 0 24px 24px 0;
+    border-radius: 0 40px 40px 0;
 }
 .sidebar-header {
     display: flex;
@@ -384,7 +387,7 @@ export default {
 .logo-icon {
     width: 56px;
     height: 56px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #596fcf 0%, #69438f 100%);
     border-radius: 14px;
     display: flex;
     align-items: center;
@@ -426,28 +429,20 @@ export default {
     background: rgba(255,255,255,0.08);
     color: #fff;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.12);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
     transition: background 0.2s, transform 0.2s;
     display: flex;
     align-items: center;
     gap: 0.7rem;
     justify-content: flex-start;
 }
-.sidebar-btn:hover {
-    background: rgba(255,255,255,0.18);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.18);
-}
 .sidebar-btn:active {
     transform: translateY(0);
 }
 .sidebar-btn:hover {
-    background: linear-gradient(120deg, #5a67d8 0%, #6b47a1 100%);
+    background: linear-gradient(120deg, #865ad8 0%, #563981 100%);
     transform: translateY(-2px);
     box-shadow: 0 4px 16px rgba(102, 126, 234, 0.18);
-}
-.sidebar-btn:active {
-    transform: translateY(0);
 }
 .icon {
     font-size: 1.3rem;

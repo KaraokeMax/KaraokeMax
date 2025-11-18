@@ -16,9 +16,9 @@ def save_temp_files(audio_file, lrc_file):
 
 def process_audio_and_lrc(audio_path, lrc_path):
     voz_path, instrumental_path = separar_voz(audio_path)
-    lrc_final_path = processar_lrc_com_pitch(lrc_path, voz_path, output_dir=TEMP_FOLDER)
+    # lrc_final_path = processar_lrc_com_pitch(lrc_path, voz_path, output_dir=TEMP_FOLDER)
     json_path = gerar_json_notas(lrc_path, voz_path, output_dir=TEMP_FOLDER)
-    return voz_path, instrumental_path, lrc_final_path, json_path
+    return voz_path, instrumental_path, lrc_path, json_path
 
 def cleanup_temp_folder():
     import shutil

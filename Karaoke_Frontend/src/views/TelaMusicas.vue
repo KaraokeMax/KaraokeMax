@@ -7,7 +7,7 @@
 					class="search-input" />
 			</div>
 			<div v-if="loading" class="loading">Carregando músicas...</div>
-			<div v-else>
+			<div v-else class="musicas-list-container">
 				<div v-if="musicasFiltradas.length === 0" class="no-results">Nenhuma música encontrada.</div>
 				<ul class="musicas-list">
 					<li v-for="musica in musicasFiltradas" :key="musica.id" class="musica-item">
@@ -80,15 +80,15 @@ export default {
 			if (!this.musicas.length) {
 				this.musicas = [
 					{ id: 1, nome: 'Evidências', artista: { nome: 'Chitãozinho & Xororó' } },
-					{ id: 2, nome: 'Fogo e Paixão', artista: { nome: 'Wando' } },
-					{ id: 3, nome: 'Garçom', artista: { nome: 'Reginaldo Rossi' } },
-					{ id: 4, nome: 'Sinônimos', artista: { nome: 'Zezé Di Camargo & Luciano' } },
-					{ id: 5, nome: 'Ainda Ontem Chorei de Saudade', artista: { nome: 'João Mineiro & Marciano' } }
+					{ id: 2, nome: 'Shape of You', artista: { nome: 'Ed Sheeran' } },
+					{ id: 3, nome: 'Sorry', artista: { nome: 'Justin Bieber' } },
+					{ id: 4, nome: 'Meteoro da Paixão', artista: { nome: 'Luan Santana' } },
+					{ id: 5, nome: 'Mercy', artista: { nome: 'Shawn Mendes' } }
 				];
 				this.musicasFiltradas = this.musicas;
 				this.loading = false;
 			}
-		}, 1200);
+		}, 1000);
 	}
 };
 </script>
@@ -147,6 +147,13 @@ export default {
 	margin-bottom: 1.2rem;
 }
 
+.musicas-list-container {
+	width: 100%;
+	flex: 1;
+	overflow-y: auto;
+	padding-right: 10px;
+}
+
 .search-input {
 	width: 45vw;
 	min-width: 200px;
@@ -171,7 +178,7 @@ export default {
 	list-style: none;
 	padding: 0;
 	margin: 0 auto;
-	width: 100%;
+	width: 75%;
 	box-sizing: border-box;
 }
 
@@ -215,7 +222,9 @@ export default {
 
 .loading {
 	text-align: center;
-	color: #667eea;
+	color: #bdc3c7;
 	margin-top: 2rem;
 }
+
+
 </style>
