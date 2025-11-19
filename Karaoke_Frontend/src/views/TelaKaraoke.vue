@@ -227,7 +227,7 @@ function hzToNoteName(hz, a4 = 440) {
 }
 
 /* ========= Helpers de desenho (piano-roll contínuo) ========= */
-function centsToY(cents, H = 300, semitonPx = 10, refCents = 4800) {
+function centsToY(cents, H = 200, semitonPx = 5, refCents = 5600) {
 	const centerY = H / 2;
 	const semitons = (cents - refCents) / 100;
 	const y = centerY - semitons * semitonPx;
@@ -283,7 +283,7 @@ function drawRoll(ctx, W, H, {
 			continue;
 		}
 		const x = xOfTime(t);
-		const y = centsToY(c, H, medianCents);
+		const y = centsToY(c, H, 5, medianCents);
 		if (!started) {
 			ctx.moveTo(x, y);
 			started = true;
@@ -300,7 +300,7 @@ function drawRoll(ctx, W, H, {
 		const c = refCents[i];
 		if (c == null) continue;
 		const x = xOfTime(t);
-		const y = centsToY(c, H, medianCents);
+		const y = centsToY(c, H, 5, medianCents);
 		ctx.beginPath();
 		ctx.arc(x, y, 2.2, 0, Math.PI * 2);
 		ctx.fill();
@@ -325,7 +325,7 @@ function drawRoll(ctx, W, H, {
 			continue;
 		}
 		const x = xOfTime(t);
-		const y = centsToY(c, H, medianCents);
+		const y = centsToY(c, H, 5, medianCents);
 		if (!startedU) {
 			ctx.moveTo(x, y);
 			startedU = true;
@@ -342,7 +342,7 @@ function drawRoll(ctx, W, H, {
 		const c = userCentsGlobal[i];
 		if (c == null) continue;
 		const x = xOfTime(t);
-		const y = centsToY(c, H, medianCents);
+		const y = centsToY(c, H, 5, medianCents);
 		ctx.beginPath();
 		ctx.arc(x, y, 3, 0, Math.PI * 2);
 		ctx.fill();
@@ -724,7 +724,7 @@ export default {
 			console.log('🎯 Pontuação DTW calculada:', novaPontuacao.toFixed(2) + '%');
 			
 			this.pontuacoesFrames.push(novaPontuacao);
-			this.pontuacaoTotal = this.pontuacoesFrames.sum() / this.pontuacoesFrames.length;
+			this.pontuacaoTotal = this.pontuacoesFrames.reduce((total, valor) => total + valor, 0) / this.pontuacoesFrames.length;
 		},
 		
 		detectarPitch() {
