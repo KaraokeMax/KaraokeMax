@@ -486,6 +486,7 @@ export default {
 
 			showScoreModal: false,
 			isPontuacaoPublica: true,
+			musicaId: null,
 		};
 	},
 	computed: {
@@ -514,6 +515,7 @@ export default {
 
 			try {
 				const musicaId = this.$route?.query?.id;
+				this.musicaId = musicaId;
 				if (!musicaId) throw new Error('ID da música não encontrado na rota.');
 
 				const resp = await api.get(`/musicas/arquivos/${musicaId}`, { responseType: 'arraybuffer' });
@@ -976,7 +978,7 @@ export default {
 
 		async salvarPontuacao(isPublica) {
 			try {
-				const musicaId = this.$route?.query?.id;
+				const musicaId = this.musicaId;
 				
 				await api.post('/pontuacoes', {
 					idMusica: musicaId,

@@ -18,7 +18,7 @@
 						</div>
 						<div class="pontuacao-score">
 							<span class="score-label">Pontuação</span>
-							<span class="score-value">{{ pontuacao.pontuacao }}</span>
+							<span class="score-value">{{ pontuacao.pontos }}</span>
 						</div>
 					</li>
 				</ul>
@@ -47,8 +47,9 @@ export default {
 				const res = await api.get('/pontuacoes');
 				this.pontuacoes = res.data.map(p => ({
 					...p,
-					musica: p.musica || { nome: 'Música desconhecida', artista: { nome: 'Artista desconhecido' } },
-					usuario: p.usuario || { nome: 'Usuário desconhecido' }
+					musica: p.musica || { nome: 'Música desconhecida', 
+					artista: { nome: 'Artista desconhecido' } },
+					usuario: { nome: p.nomeUsuario } || { nome: 'Usuário desconhecido' }
 				}));
 				this.pontuacoesFiltradas = this.pontuacoes;
 			} catch (err) {
@@ -73,53 +74,53 @@ export default {
 	},
 	mounted() {
 		// Descomente para usar dados reais da API
-		// this.carregarPontuacoes();
+		this.carregarPontuacoes();
 		
 		// Mock para visualização se não houver dados reais
-		setTimeout(() => {
-			if (!this.pontuacoes.length) {
-				this.pontuacoes = [
-					{ 
-						id: 1, 
-						pontuacao: 95, 
-						musica: { nome: 'Evidências', artista: { nome: 'Chitãozinho & Xororó' } },
-						usuario: { nome: 'João Silva' }
-					},
-					{ 
-						id: 2, 
-						pontuacao: 88, 
-						musica: { nome: 'Fogo e Paixão', artista: { nome: 'Wando' } },
-						usuario: { nome: 'Maria Santos' }
-					},
-					{ 
-						id: 3, 
-						pontuacao: 92, 
-						musica: { nome: 'Garçom', artista: { nome: 'Reginaldo Rossi' } },
-						usuario: { nome: 'Pedro Oliveira' }
-					},
-					{ 
-						id: 4, 
-						pontuacao: 78, 
-						musica: { nome: 'Sinônimos', artista: { nome: 'Zezé Di Camargo & Luciano' } },
-						usuario: { nome: 'Ana Costa' }
-					},
-					{ 
-						id: 5, 
-						pontuacao: 85, 
-						musica: { nome: 'Ainda Ontem Chorei de Saudade', artista: { nome: 'João Mineiro & Marciano' } },
-						usuario: { nome: 'Carlos Ferreira' }
-					},
-					{ 
-						id: 6, 
-						pontuacao: 91, 
-						musica: { nome: 'Evidências', artista: { nome: 'Chitãozinho & Xororó' } },
-						usuario: { nome: 'Lucia Mendes' }
-					}
-				];
-				this.pontuacoesFiltradas = this.pontuacoes;
-				this.loading = false;
-			}
-		}, 1200);
+		// setTimeout(() => {
+		// 	if (!this.pontuacoes.length) {
+		// 		this.pontuacoes = [
+		// 			{ 
+		// 				id: 1, 
+		// 				pontuacao: 95, 
+		// 				musica: { nome: 'Evidências', artista: { nome: 'Chitãozinho & Xororó' } },
+		// 				usuario: { nome: 'João Silva' }
+		// 			},
+		// 			{ 
+		// 				id: 2, 
+		// 				pontuacao: 88, 
+		// 				musica: { nome: 'Fogo e Paixão', artista: { nome: 'Wando' } },
+		// 				usuario: { nome: 'Maria Santos' }
+		// 			},
+		// 			{ 
+		// 				id: 3, 
+		// 				pontuacao: 92, 
+		// 				musica: { nome: 'Garçom', artista: { nome: 'Reginaldo Rossi' } },
+		// 				usuario: { nome: 'Pedro Oliveira' }
+		// 			},
+		// 			{ 
+		// 				id: 4, 
+		// 				pontuacao: 78, 
+		// 				musica: { nome: 'Sinônimos', artista: { nome: 'Zezé Di Camargo & Luciano' } },
+		// 				usuario: { nome: 'Ana Costa' }
+		// 			},
+		// 			{ 
+		// 				id: 5, 
+		// 				pontuacao: 85, 
+		// 				musica: { nome: 'Ainda Ontem Chorei de Saudade', artista: { nome: 'João Mineiro & Marciano' } },
+		// 				usuario: { nome: 'Carlos Ferreira' }
+		// 			},
+		// 			{ 
+		// 				id: 6, 
+		// 				pontuacao: 91, 
+		// 				musica: { nome: 'Evidências', artista: { nome: 'Chitãozinho & Xororó' } },
+		// 				usuario: { nome: 'Lucia Mendes' }
+		// 			}
+		// 		];
+		// 		this.pontuacoesFiltradas = this.pontuacoes;
+		// 		this.loading = false;
+		// 	}
+		// }, 1200);
 	}
 };
 </script>
