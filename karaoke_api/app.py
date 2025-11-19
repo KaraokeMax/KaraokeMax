@@ -49,7 +49,7 @@ def process_audio():
     def _run():
         try:
             JOBS[id_job]["status"] = "running"
-            process_request(audio_path, lrc_path, artista_nome, musica_nome, id_job, id_musica)
+            process_request(audio_path, lrc_path, artista_nome, musica_nome, id_job)
             JOBS[id_job]["status"] = "done"
             JOBS[id_job]["result"] = {"message": "Arquivos processados e enviados ao B2.", "id_job": id_job}
             atualizar_status_musica(id_musica, "PRONTA")

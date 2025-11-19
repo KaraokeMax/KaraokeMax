@@ -393,7 +393,7 @@ export default {
     align-items: center;
     justify-content: center;
     color: white;
-    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.18);
+    box-shadow: 0 2px 16px rgba(255, 255, 255, 0.5);
     margin-bottom: 10px;
     transition: transform 0.25s cubic-bezier(0.4,0.2,0.2,1), box-shadow 0.25s cubic-bezier(0.4,0.2,0.2,1);
 }

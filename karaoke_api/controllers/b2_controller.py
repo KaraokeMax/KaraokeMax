@@ -38,7 +38,7 @@ def upload_to_b2(voz_path, instrumental_path, lrc_final_path, json_path, artista
                 "id_job": id_job
             }
         )
-        print(f"[B2 UPLOAD] Upload concluído. Resultado: {result}")
+        print(f"[B2 UPLOAD] Upload concluído")
     except Exception as e:
         print(f"[B2 UPLOAD ERROR] {str(e)}")
         return {"error": str(e)}

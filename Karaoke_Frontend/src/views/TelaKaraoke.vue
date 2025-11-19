@@ -239,7 +239,7 @@ function drawStaffBase(ctx, W, H) {
 	ctx.strokeStyle = "#e2e8f0";
 	ctx.lineWidth = 1.5;
 	for (let i = 0; i < 5; i++) {
-		const y = 40 + i * 20;
+		const y = 25 + i * 25;
 		ctx.beginPath();
 		ctx.moveTo(0, y);
 		ctx.lineTo(W, y);
@@ -256,7 +256,7 @@ function drawStaffBase(ctx, W, H) {
 
 function drawRoll(ctx, W, H, {
 	tCenterMs, windowPastMs, windowFutureMs, hopMs,
-	refTimesMs, refCents, userCentsGlobal, refStartMs
+	refTimesMs, refCents, userCentsGlobal, refStartMs, medianCents
 }) {
 	drawStaffBase(ctx, W, H);
 
@@ -283,7 +283,7 @@ function drawRoll(ctx, W, H, {
 			continue;
 		}
 		const x = xOfTime(t);
-		const y = centsToY(c, H);
+		const y = centsToY(c, H, medianCents);
 		if (!started) {
 			ctx.moveTo(x, y);
 			started = true;
@@ -300,7 +300,7 @@ function drawRoll(ctx, W, H, {
 		const c = refCents[i];
 		if (c == null) continue;
 		const x = xOfTime(t);
-		const y = centsToY(c, H);
+		const y = centsToY(c, H, medianCents);
 		ctx.beginPath();
 		ctx.arc(x, y, 2.2, 0, Math.PI * 2);
 		ctx.fill();
@@ -325,7 +325,7 @@ function drawRoll(ctx, W, H, {
 			continue;
 		}
 		const x = xOfTime(t);
-		const y = centsToY(c, H);
+		const y = centsToY(c, H, medianCents);
 		if (!startedU) {
 			ctx.moveTo(x, y);
 			startedU = true;
@@ -342,7 +342,7 @@ function drawRoll(ctx, W, H, {
 		const c = userCentsGlobal[i];
 		if (c == null) continue;
 		const x = xOfTime(t);
-		const y = centsToY(c, H);
+		const y = centsToY(c, H, medianCents);
 		ctx.beginPath();
 		ctx.arc(x, y, 3, 0, Math.PI * 2);
 		ctx.fill();
@@ -464,6 +464,7 @@ export default {
 			refStartMs: 0,
 			refEndMs: 0,
 			userCentsGlobal: [],
+			medianCents: 4800, // valor padrão para centralizar 
 
 			// janela de visualização
 			windowPastMs: 1500,
@@ -563,6 +564,7 @@ export default {
 				this.refEndMs = this.refTimesMs.length ? this.refTimesMs[this.refTimesMs.length - 1] : 0;
 
 				this.userCentsGlobal = new Array(this.refTimesMs.length).fill(null);
+				this.medianCents = this.notesJson.median_cents || 4800;
 
 				if (this._audioObjectUrl) URL.revokeObjectURL(this._audioObjectUrl);
 				this._audioObjectUrl = URL.createObjectURL(new Blob([instrBlob], { type: 'audio/wav' }));
@@ -831,7 +833,8 @@ export default {
 				refTimesMs: this.refTimesMs,
 				refCents: this.refCents,
 				userCentsGlobal: this.userCentsGlobal,
-				refStartMs: this.refStartMs
+				refStartMs: this.refStartMs,
+				medianCents: this.medianCents
 			});
 		},
 

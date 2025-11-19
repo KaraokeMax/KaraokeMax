@@ -111,6 +111,9 @@ def gerar_json_notas(lrc_path, wav_path, output_dir="temp", confidence_threshold
         "segments": []
     }
 
+    maior_cents = 0.0
+    menor_cents = 999999999999999999
+
     # 5) Para cada linha do LRC, fatiar os frames do CREPE e preencher campos
     for seg in segments_lrc:
         start_s = seg["start_s"]
@@ -168,6 +171,9 @@ def gerar_json_notas(lrc_path, wav_path, output_dir="temp", confidence_threshold
             conf_list.append(float(conf_seg[i]))
             if voiced_seg[i] == 1 and np.isfinite(cents_seg[i]):
                 cents_list.append(float(cents_seg[i]))
+                # Atualiza min/max global
+                if cents_seg[i] < menor_cents: menor_cents = cents_seg[i]
+                if cents_seg[i] > maior_cents: maior_cents = cents_seg[i]
             else:
                 cents_list.append(None)  # vira 'null' no JSON
 
@@ -181,6 +187,9 @@ def gerar_json_notas(lrc_path, wav_path, output_dir="temp", confidence_threshold
             "hist_chroma": [float(x) for x in hist.tolist()],
             "conf_mean": conf_mean
         })
+
+    median_cents = (maior_cents + menor_cents) / 2.0
+    out["median_cents"] = median_cents
 
     # 6) Salvar JSON
     out_path = os.path.join(output_dir, f"{base_name}.notes.json")

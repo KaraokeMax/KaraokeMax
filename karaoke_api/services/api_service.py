@@ -3,6 +3,7 @@ base_url = "http://localhost:3000"
 # base_url = "https://karaokemax.onrender.com"
 
 def atualizar_status_musica(id_musica, novo_status, erro = None):
+    print("[STATUS UPDATE] Atualizando status da música...")
     url = f"{base_url}/musicas/{id_musica}/status"
     headers = {
         "Content-Type": "application/json"
